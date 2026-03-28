@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Clone Studio — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --surface2: #1c1c28;
+      --border: #2a2a3d;
+      --accent: #7c5cfc;
+      --accent-glow: rgba(124, 92, 252, 0.35);
+      --accent2: #c084fc;
+      --text: #f0f0f8;
+      --text-muted: #8888aa;
+      --error: #f87171;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 500px; height: 500px;
+      top: -100px; left: -100px;
+      background: radial-gradient(circle, rgba(124,92,252,0.18), transparent 70%);
+    }
+    body::after {
+      width: 400px; height: 400px;
+      bottom: -80px; right: -80px;
+      background: radial-gradient(circle, rgba(192,132,252,0.14), transparent 70%);
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .logo svg { width: 44px; height: 44px; }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .field { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 0.82rem;
+      color: var(--error);
+      margin-bottom: 16px;
+    }
+    .error-msg.visible { display: block; }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 24px var(--accent-glow);
+      transition: all 0.2s;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(124,92,252,0.5); }
+    button:active { transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="44" height="44" rx="12" fill="url(#lg)"/>
+        <path d="M12 22 Q16 12 22 22 Q28 32 32 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <circle cx="12" cy="22" r="2" fill="white"/>
+        <circle cx="32" cy="22" r="2" fill="white"/>
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#7c5cfc"/><stop offset="1" stop-color="#c084fc"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <h1>Voice Clone Studio</h1>
+    <p class="subtitle">Sign in to continue</p>
+
+    <div class="error-msg" id="errorMsg">Invalid username or password</div>
+
+    <form method="POST" action="/login">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" autofocus required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit">Sign In</button>
+    </form>
+  </div>
+
+  <script>
+    // Show error if server returned one via header or query param
+    const params = new URLSearchParams(location.search);
+    if (params.get('error') || document.cookie.includes('login_error')) {
+      document.getElementById('errorMsg').classList.add('visible');
+    }
+    // Also check meta injected by server redirect
+    const header = document.querySelector('meta[name="login-error"]');
+    if (header) document.getElementById('errorMsg').classList.add('visible');
+  </script>
+</body>
+</html>

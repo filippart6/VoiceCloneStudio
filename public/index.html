@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Clone Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --surface2: #1c1c28;
+      --border: #2a2a3d;
+      --accent: #7c5cfc;
+      --accent-glow: rgba(124, 92, 252, 0.35);
+      --accent2: #c084fc;
+      --text: #f0f0f8;
+      --text-muted: #8888aa;
+      --success: #34d399;
+      --error: #f87171;
+      --warn: #fbbf24;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 80px;
+    }
+
+    /* Background orbs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 600px; height: 600px;
+      top: -150px; left: -150px;
+      background: radial-gradient(circle, rgba(124,92,252,0.15), transparent 70%);
+    }
+    body::after {
+      width: 500px; height: 500px;
+      bottom: -100px; right: -100px;
+      background: radial-gradient(circle, rgba(192,132,252,0.12), transparent 70%);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .header .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .header .logo svg {
+      width: 36px; height: 36px;
+    }
+    .header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent2);
+      margin-bottom: 20px;
+    }
+
+    /* Form fields */
+    .field {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Drop zone */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface2);
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(124, 92, 252, 0.07);
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .dropzone-icon {
+      width: 48px; height: 48px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dropzone-icon svg { width: 24px; height: 24px; color: #fff; }
+    .dropzone h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .dropzone p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .dropzone .formats {
+      display: inline-flex;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* File selected state */
+    .file-preview {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-top: 14px;
+    }
+    .file-preview.visible { display: flex; }
+    .file-preview .file-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .file-preview .file-icon svg { width: 18px; height: 18px; color: #fff; }
+    .file-preview .file-info { flex: 1; min-width: 0; }
+    .file-preview .file-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-preview .file-size {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .file-preview .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      transition: color 0.2s;
+    }
+    .file-preview .remove-btn:hover { color: var(--error); }
+
+    /* Waveform animation */
+    .waveform {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 24px;
+    }
+    .waveform span {
+      display: block;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: wave 1.2s ease-in-out infinite;
+    }
+    .waveform span:nth-child(1) { height: 8px; animation-delay: 0s; }
+    .waveform span:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+    .waveform span:nth-child(3) { height: 22px; animation-delay: 0.2s; }
+    .waveform span:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+    .waveform span:nth-child(5) { height: 20px; animation-delay: 0.15s; }
+    .waveform span:nth-child(6) { height: 10px; animation-delay: 0.25s; }
+    .waveform span:nth-child(7) { height: 18px; animation-delay: 0.05s; }
+    @keyframes wave {
+      0%, 100% { transform: scaleY(1); opacity: 0.6; }
+      50% { transform: scaleY(1.6); opacity: 1; }
+    }
+
+    /* Submit button */
+    .btn {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 24px var(--accent-glow);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(124,92,252,0.5);
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    .btn.loading .spinner { display: block; }
+    .btn.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status messages */
+    .status {
+      display: none;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-top: 16px;
+      border: 1px solid;
+    }
+    .status.visible { display: block; }
+    .status.success {
+      background: rgba(52, 211, 153, 0.1);
+      border-color: rgba(52, 211, 153, 0.3);
+      color: var(--success);
+    }
+    .status.error {
+      background: rgba(248, 113, 113, 0.1);
+      border-color: rgba(248, 113, 113, 0.3);
+      color: var(--error);
+    }
+    .status.info {
+      background: rgba(124, 92, 252, 0.1);
+      border-color: rgba(124, 92, 252, 0.3);
+      color: #a78bfa;
+    }
+
+    .status .status-icon {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    /* Result card */
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--success), #6ee7b7);
+    }
+    .result-card.visible { display: block; }
+    .result-card .result-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .result-card .check-icon {
+      width: 36px; height: 36px;
+      background: rgba(52, 211, 153, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .result-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+    .result-card .voice-details {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .result-card .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+    .result-card .detail-row + .detail-row {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .result-card .detail-label { color: var(--text-muted); }
+    .result-card .detail-value {
+      font-weight: 500;
+      color: var(--text);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.75rem;
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Toggle switch */
+    .toggle-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .toggle-field:hover { border-color: var(--accent); }
+    .toggle-info { flex: 1; }
+    .toggle-info .toggle-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .toggle-info .toggle-label svg { color: var(--accent2); }
+    .toggle-info .toggle-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 24px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked + .toggle-track {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(20px);
+    }
+
+    /* Tips */
+    .tips {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      margin-top: 4px;
+    }
+    .tips h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .tips ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tips li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .tips li::before {
+      content: '→';
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Select dropdown */
+    select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    select option { background: #1c1c28; }
+
+    /* Sliders */
+    .slider-field { margin-bottom: 18px; }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .slider-header label { margin-bottom: 0; }
+    .slider-value {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent2);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      min-width: 32px;
+      text-align: right;
+    }
+    .slider-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: -4px;
+      margin-bottom: 8px;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      appearance: none;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 8px var(--accent-glow);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Audio player */
+    .audio-player {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-top: 16px;
+    }
+    .audio-player.visible { display: block; }
+    .audio-player audio {
+      width: 100%;
+      height: 36px;
+      accent-color: var(--accent);
+    }
+    .audio-player .audio-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .download-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .download-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+    }
+    .controls-grid .slider-field { grid-column: 1 / -1; }
+
+    /* API key notice */
+    .api-notice {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.8rem;
+      color: var(--warn);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .api-notice svg { flex-shrink: 0; margin-top: 1px; }
+    .api-notice code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: rgba(251, 191, 36, 0.15);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="10" fill="url(#logoGrad)"/>
+          <path d="M10 18 Q13 10 18 18 Q23 26 26 18" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <circle cx="10" cy="18" r="1.5" fill="white"/>
+          <circle cx="26" cy="18" r="1.5" fill="white"/>
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7c5cfc"/>
+              <stop offset="1" stop-color="#c084fc"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1>Voice Clone Studio</h1>
+      <p>Upload a voice sample and create an AI voice clone in seconds</p>
+    </div>
+    <div style="position:fixed;top:16px;right:20px;z-index:100;">
+      <a href="/logout" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">Sign out</a>
+    </div>
+
+    <!-- API key notice -->
+    <div class="api-notice" id="apiNotice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>Add your ElevenLabs API key to <code>.env</code> before starting the server. Get one at elevenlabs.io</span>
+    </div>
+
+    <!-- Result card (shown after success) -->
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div class="check-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Voice Clone Created!</h3>
+        </div>
+      </div>
+      <div class="voice-details">
+        <div class="detail-row">
+          <span class="detail-label">Voice Name</span>
+          <span class="detail-value" id="resultName">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Voice ID</span>
+          <span>
+            <span class="detail-value" id="resultId">—</span>
+            <button class="copy-btn" id="copyIdBtn" onclick="copyVoiceId()">Copy</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TTS card -->
+    <div class="card" id="ttsCard">
+      <div class="card-title">Generate Speech</div>
+
+      <div class="field">
+        <label for="ttsVoice">Voice</label>
+        <select id="ttsVoice">
+          <option value="">Loading voices…</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="ttsModel">Model</label>
+        <select id="ttsModel">
+          <option value="eleven_multilingual_v2">Multilingual v2 — best quality</option>
+          <option value="eleven_turbo_v2_5">Turbo v2.5 — fast &amp; multilingual</option>
+          <option value="eleven_turbo_v2">Turbo v2 — fastest</option>
+          <option value="eleven_monolingual_v1">Monolingual v1 — English only</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="ttsText">Text</label>
+        <textarea id="ttsText" placeholder="Type something to speak…" style="min-height:110px;"></textarea>
+        <div style="text-align:right;font-size:0.72rem;color:var(--text-muted);margin-top:4px;">
+          <span id="charCount">0</span> / 5000
+        </div>
+      </div>
+
+      <!-- Voice controls -->
+      <div style="margin-bottom:6px;">
+        <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:16px;">Voice Controls</div>
+
+        <div class="slider-field">
+          <div class="slider-header">
+            <label for="stability">Stability</label>
+            <span class="slider-value" id="stabilityVal">0.50</span>
+          </div>
+          <div class="slider-desc">Higher = more consistent; lower = more expressive</div>
+          <input type="range" id="stability" min="0" max="1" step="0.01" value="0.50" oninput="document.getElementById('stabilityVal').textContent=parseFloat(this.value).toFixed(2)" />
+        </div>
+
+        <div class="slider-field">
+          <div class="slider-header">
+            <label for="similarity">Similarity Boost</label>
+            <span class="slider-value" id="similarityVal">0.75</span>
+          </div>
+          <div class="slider-desc">How closely the output matches the original voice</div>
+          <input type="range" id="similarity" min="0" max="1" step="0.01" value="0.75" oninput="document.getElementById('similarityVal').textContent=parseFloat(this.value).toFixed(2)" />
+        </div>
+
+        <div class="slider-field">
+          <div class="slider-header">
+            <label for="style">Style Exaggeration</label>
+            <span class="slider-value" id="styleVal">0.00</span>
+          </div>
+          <div class="slider-desc">Amplifies speaking style — may reduce stability at high values</div>
+          <input type="range" id="style" min="0" max="1" step="0.01" value="0" oninput="document.getElementById('styleVal').textContent=parseFloat(this.value).toFixed(2)" />
+        </div>
+
+        <label class="toggle-field" for="speakerBoost" style="margin-bottom:0;">
+          <div class="toggle-info">
+            <div class="toggle-label">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/>
+              </svg>
+              Speaker Boost
+            </div>
+            <div class="toggle-desc">Increases voice similarity — uses more processing</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="speakerBoost" checked />
+            <div class="toggle-track"></div>
+          </div>
+        </label>
+      </div>
+
+      <div id="ttsStatus" class="status" style="margin-top:16px;"></div>
+
+      <div class="audio-player" id="audioPlayer">
+        <div class="audio-label">
+          <span>Generated audio</span>
+          <button class="download-btn" id="downloadBtn" onclick="downloadAudio()">Download</button>
+        </div>
+        <audio id="audioEl" controls></audio>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="generateBtn" onclick="generateSpeech()" style="margin-top:20px;" disabled>
+        <div class="spinner"></div>
+        <span class="btn-text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-3px;margin-right:6px;">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Generate Speech
+        </span>
+      </button>
+    </div>
+
+    <!-- Main form card -->
+    <div class="card">
+      <div class="card-title">Voice Configuration</div>
+
+      <form id="cloneForm">
+        <div class="field">
+          <label for="voiceName">Voice Name</label>
+          <input
+            type="text"
+            id="voiceName"
+            name="voiceName"
+            placeholder="e.g. My Custom Voice"
+            maxlength="100"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="description">Description <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Describe the voice characteristics…"
+            maxlength="500"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label>Audio Sample</label>
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="audioFile" name="audio" accept=".wav,.mp3,audio/wav,audio/mpeg" />
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <h3>Drop your audio file here</h3>
+            <p>or click to browse</p>
+            <div class="formats">
+              <span class="badge">WAV</span>
+              <span class="badge">MP3</span>
+              <span class="badge">Up to 50MB</span>
+            </div>
+          </div>
+
+          <!-- File preview -->
+          <div class="file-preview" id="filePreview">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18V5l12-2v13"/>
+                <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+              </svg>
+            </div>
+            <div class="file-info">
+              <div class="file-name" id="fileName">filename.wav</div>
+              <div class="file-size" id="fileSize">0 KB</div>
+            </div>
+            <div class="waveform">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+            <button type="button" class="remove-btn" onclick="removeFile()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <label class="toggle-field" for="noiseReduction">
+          <div class="toggle-info">
+            <div class="toggle-label">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 013 3v7a3 3 0 01-6 0V5a3 3 0 013-3z"/>
+                <path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="4" y1="4" x2="20" y2="20" stroke="var(--error)" stroke-width="1.5"/>
+              </svg>
+              Noise Reduction
+            </div>
+            <div class="toggle-desc">Remove background noise from the audio sample</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="noiseReduction" name="noiseReduction" />
+            <div class="toggle-track"></div>
+          </div>
+        </label>
+
+        <div id="statusMsg" class="status"></div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+          <div class="spinner"></div>
+          <span class="btn-text">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-3px;margin-right:6px;">
+              <path d="M12 2a3 3 0 013 3v7a3 3 0 01-6 0V5a3 3 0 013-3z"/>
+              <path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+            Clone Voice
+          </span>
+        </button>
+      </form>
+
+      <div class="tips">
+        <h4>Tips for best results</h4>
+        <ul>
+          <li>Use a clear recording with minimal background noise</li>
+          <li>At least 30 seconds of audio — longer samples improve quality</li>
+          <li>Speak naturally with varied intonation</li>
+          <li>Avoid music, reverb, or heavy processing</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const form = document.getElementById('cloneForm');
+    const fileInput = document.getElementById('audioFile');
+    const dropzone = document.getElementById('dropzone');
+    const filePreview = document.getElementById('filePreview');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    const resultCard = document.getElementById('resultCard');
+    let selectedFile = null;
+
+    // Drag & drop
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['wav', 'mp3'].includes(ext)) {
+        showStatus('Only .wav and .mp3 files are supported', 'error');
+        return;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        showStatus('File size must be under 50MB', 'error');
+        return;
+      }
+      selectedFile = file;
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = formatSize(file.size);
+      filePreview.classList.add('visible');
+      dropzone.style.display = 'none';
+      clearStatus();
+      updateSubmitState();
+    }
+
+    function removeFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      filePreview.classList.remove('visible');
+      dropzone.style.display = '';
+      updateSubmitState();
+    }
+
+    function updateSubmitState() {
+      const hasName = document.getElementById('voiceName').value.trim().length > 0;
+      submitBtn.disabled = !(selectedFile && hasName);
+    }
+
+    document.getElementById('voiceName').addEventListener('input', updateSubmitState);
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showStatus(msg, type = 'info') {
+      const icons = {
+        success: '✓',
+        error: '✗',
+        info: '↻'
+      };
+      statusMsg.innerHTML = `<span class="status-icon">${icons[type]}</span>${msg}`;
+      statusMsg.className = `status visible ${type}`;
+    }
+
+    function clearStatus() {
+      statusMsg.className = 'status';
+    }
+
+    // Form submit
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!selectedFile) return;
+
+      const voiceName = document.getElementById('voiceName').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const noiseReduction = document.getElementById('noiseReduction').checked;
+
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      resultCard.classList.remove('visible');
+      showStatus('Uploading and cloning your voice…', 'info');
+
+      try {
+        const formData = new FormData();
+        formData.append('audio', selectedFile, selectedFile.name);
+        formData.append('voiceName', voiceName);
+        if (description) formData.append('description', description);
+        formData.append('noiseReduction', noiseReduction ? 'true' : 'false');
+
+        const res = await fetch('/api/clone-voice', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Something went wrong');
+        }
+
+        // Show success
+        document.getElementById('resultName').textContent = data.voiceName;
+        document.getElementById('resultId').textContent = data.voiceId;
+        resultCard.classList.add('visible');
+        showStatus('Voice clone created successfully!', 'success');
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      } catch (err) {
+        showStatus(err.message, 'error');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        updateSubmitState();
+      }
+    });
+
+    function copyVoiceId() {
+      const id = document.getElementById('resultId').textContent;
+      navigator.clipboard.writeText(id).then(() => {
+        const btn = document.getElementById('copyIdBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    // ── TTS ──────────────────────────────────────────────
+
+    const ttsText = document.getElementById('ttsText');
+    const charCount = document.getElementById('charCount');
+    const generateBtn = document.getElementById('generateBtn');
+    const ttsVoice = document.getElementById('ttsVoice');
+    let audioBlob = null;
+
+    ttsText.addEventListener('input', () => {
+      const len = ttsText.value.length;
+      charCount.textContent = len;
+      updateGenerateState();
+    });
+    ttsVoice.addEventListener('change', updateGenerateState);
+
+    function updateGenerateState() {
+      generateBtn.disabled = !ttsVoice.value || !ttsText.value.trim();
+    }
+
+    async function loadVoices() {
+      try {
+        const res = await fetch('/api/voices');
+        const data = await res.json();
+        const voices = data.voices || [];
+        ttsVoice.innerHTML = voices.length
+          ? voices.map(v => `<option value="${v.voice_id}">${v.name}</option>`).join('')
+          : '<option value="">No cloned voices found</option>';
+        updateGenerateState();
+      } catch {
+        ttsVoice.innerHTML = '<option value="">Could not load voices</option>';
+      }
+    }
+
+    // After successful clone, add the new voice to the selector and select it
+    const origSuccessBlock = form.addEventListener;
+    function onCloneSuccess(voiceId, voiceName) {
+      const exists = ttsVoice.querySelector(`option[value="${voiceId}"]`);
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = voiceId;
+        opt.textContent = voiceName;
+        ttsVoice.prepend(opt);
+      }
+      ttsVoice.value = voiceId;
+      updateGenerateState();
+      document.getElementById('ttsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function generateSpeech() {
+      const voiceId = ttsVoice.value;
+      const text = ttsText.value.trim();
+      if (!voiceId || !text) return;
+
+      generateBtn.classList.add('loading');
+      generateBtn.disabled = true;
+      showTtsStatus('Generating speech…', 'info');
+      document.getElementById('audioPlayer').classList.remove('visible');
+
+      const body = {
+        text,
+        model_id: document.getElementById('ttsModel').value,
+        voice_settings: {
+          stability: parseFloat(document.getElementById('stability').value),
+          similarity_boost: parseFloat(document.getElementById('similarity').value),
+          style: parseFloat(document.getElementById('style').value),
+          use_speaker_boost: document.getElementById('speakerBoost').checked
+        }
+      };
+
+      try {
+        const res = await fetch(`/api/tts/${voiceId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `Error ${res.status}`);
+        }
+
+        audioBlob = await res.blob();
+        const url = URL.createObjectURL(audioBlob);
+        const audioEl = document.getElementById('audioEl');
+        audioEl.src = url;
+        audioEl.play();
+        document.getElementById('audioPlayer').classList.add('visible');
+        showTtsStatus('Speech generated!', 'success');
+
+      } catch (err) {
+        showTtsStatus(err.message, 'error');
+      } finally {
+        generateBtn.classList.remove('loading');
+        updateGenerateState();
+      }
+    }
+
+    function downloadAudio() {
+      if (!audioBlob) return;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(audioBlob);
+      a.download = 'generated-speech.mp3';
+      a.click();
+    }
+
+    function showTtsStatus(msg, type = 'info') {
+      const icons = { success: '✓', error: '✗', info: '↻' };
+      const el = document.getElementById('ttsStatus');
+      el.innerHTML = `<span class="status-icon">${icons[type]}</span>${msg}`;
+      el.className = `status visible ${type}`;
+    }
+
+    // Patch clone form submit to auto-select new voice in TTS
+    const _origSubmit = form.onsubmit;
+    form.addEventListener('submit', async e => {
+      // Wait for resultCard to become visible, then sync voice
+      const observer = new MutationObserver(() => {
+        if (resultCard.classList.contains('visible')) {
+          observer.disconnect();
+          const id = document.getElementById('resultId').textContent;
+          const name = document.getElementById('resultName').textContent;
+          if (id && id !== '—') onCloneSuccess(id, name);
+        }
+      });
+      observer.observe(resultCard, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    loadVoices();
+  </script>
+</body>
+</html>
