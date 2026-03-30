@@ -135,10 +135,12 @@ def upload_reference():
         ext = '.jpg'
     filename = f'ref_{uuid.uuid4().hex}{ext}'
     (UPLOADS_DIR / filename).write_bytes(f.read())
-    # Force HTTPS unless running locally
-    host = request.host
-    scheme = 'http' if host.startswith('localhost') or host.startswith('127.') else 'https'
-    url = f"{scheme}://{host}/uploads/{filename}"
+    # Use Railway's public domain if available, otherwise fall back to request host
+    railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if railway_domain:
+        url = f"https://{railway_domain}/uploads/{filename}"
+    else:
+        url = f"http://localhost:{os.environ.get('PORT', 3000)}/uploads/{filename}"
     return jsonify({'url': url, 'filename': filename})
 
 
