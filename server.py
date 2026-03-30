@@ -110,8 +110,8 @@ def logout():
 # ── Static uploads ────────────────────────────────────────────────────────────
 
 @app.route('/uploads/<filename>')
-@login_required
 def serve_upload(filename):
+    # Reference images must be publicly accessible so Seedream can fetch them
     return send_from_directory(UPLOADS_DIR, filename)
 
 
