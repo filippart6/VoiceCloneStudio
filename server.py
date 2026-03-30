@@ -287,10 +287,13 @@ def generate_image():
     if body.get('negative_prompt'):
         payload['negative_prompt'] = body['negative_prompt']
 
-    ref_url = body.get('reference_image_url', '')
-    if ref_url:
-        payload['image'] = ref_url
-        print(f'[ref-image] sending image URL: {ref_url}', flush=True)
+    ref = body.get('reference_image_b64', '')
+    if ref:
+        # Send as data URI — Seedream accepts data:image/...;base64,... format
+        if not ref.startswith('data:'):
+            ref = f'data:image/jpeg;base64,{ref}'
+        payload['image'] = ref
+        print(f'[ref-image] sending as data URI, length={len(ref)}', flush=True)
 
     print(f'[generate] payload keys: {list(payload.keys())}', flush=True)
 

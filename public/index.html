@@ -2123,7 +2123,7 @@
             prompt,
             negative_prompt: negPrompt,
             width, height,
-            ...(refImageUrl ? { reference_image_url: refImageUrl } : {})
+            ...(refImageBase64 ? { reference_image_b64: refImageBase64 } : {})
           })
         });
         const data = await res.json();
@@ -2358,8 +2358,7 @@
     renderPresets();
 
     // ── Reference image ───────────────────────────────────
-    let refImageBase64 = null;  // kept for @mention / preview only
-    let refImageUrl    = null;  // server-side URL passed to Seedream
+    let refImageBase64 = null;
     const refDropzone = document.getElementById('refDropzone');
     const refFile = document.getElementById('refFile');
 
@@ -2371,11 +2370,10 @@
     });
     refFile.addEventListener('change', () => { if (refFile.files[0]) handleRefImage(refFile.files[0]); });
 
-    async function handleRefImage(file) {
-      // Show local preview immediately
+    function handleRefImage(file) {
       const reader = new FileReader();
       reader.onload = e => {
-        refImageBase64 = e.target.result;
+        refImageBase64 = e.target.result; // full data URL
         document.getElementById('refThumb').src = e.target.result;
         document.getElementById('refFileName').textContent = file.name;
         document.getElementById('refPreview').classList.add('visible');
@@ -2383,27 +2381,10 @@
         syncAtTagBar();
       };
       reader.readAsDataURL(file);
-
-      // Upload to server to get a public URL for the Seedream API
-      try {
-        const fd = new FormData();
-        fd.append('image', file);
-        const res = await fetch('/api/upload-reference', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (res.ok) {
-          refImageUrl = data.url;
-          console.log('Reference image URL:', refImageUrl);
-        } else {
-          console.warn('Reference upload failed:', data.error);
-        }
-      } catch(e) {
-        console.warn('Reference upload error:', e);
-      }
     }
 
     function removeRefImage() {
       refImageBase64 = null;
-      refImageUrl    = null;
       refFile.value = '';
       document.getElementById('refPreview').classList.remove('visible');
       refDropzone.style.display = '';
