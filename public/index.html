@@ -3334,11 +3334,37 @@
     }
 
     function historyCardHTML(item) {
-      const [w, h] = (item.size || '').split('x');
-      const ratio = w && h ? `${w}×${h}` : item.size || '';
-      const promptEsc = item.prompt.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+      const promptEsc = (item.prompt||'').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
       const negEsc = (item.neg_prompt || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
       const dataAttr = `data-prompt="${promptEsc}" data-neg="${negEsc}" data-size="${item.size||''}" data-guidance="${item.guidance_scale||7.5}" data-steps="${item.steps||30}"`;
+
+      if (item.media_type === 'video') {
+        const meta = item.video_meta || {};
+        const details = [meta.ratio, meta.resolution, meta.duration ? `${meta.duration}s` : ''].filter(Boolean).join(' · ');
+        const modelShort = (item.model||'').replace('seedance-', '').replace('-pro-', ' Pro ').replace('-', ' ');
+        return `
+          <div class="history-card" id="hcard-${item.id}">
+            <div class="history-thumb-wrap" style="background:#000;aspect-ratio:16/9;">
+              <video src="${item.image_url}" style="width:100%;height:100%;object-fit:contain;border-radius:var(--radius) var(--radius) 0 0;" preload="none"></video>
+              <div class="history-overlay">
+                <button onclick="openVideoLightbox('${item.image_url}')">▶ Play</button>
+                <button onclick="downloadHistoryImg('${item.image_url}', '${item.id}')">↓ Save</button>
+                <button class="del-btn" onclick="deleteHistory('${item.id}')">✕</button>
+              </div>
+            </div>
+            <div class="history-meta">
+              <div class="history-prompt">${item.prompt || '(no prompt)'}</div>
+              <div class="history-info">
+                <span style="background:rgba(124,92,252,0.15);color:var(--accent);padding:2px 7px;border-radius:20px;font-size:0.65rem;font-weight:700;">VIDEO</span>
+                <span>${details}</span>
+                <span>${formatDate(item.created_at)}</span>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      const [w, h] = (item.size || '').split('x');
+      const ratio = w && h ? `${w}×${h}` : item.size || '';
       return `
         <div class="history-card" id="hcard-${item.id}">
           <div class="history-thumb-wrap">
@@ -3421,12 +3447,32 @@
 
     function openLightbox(url) {
       document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightboxImg').style.display = '';
+      const lv = document.getElementById('lightboxVideo');
+      if (lv) { lv.pause(); lv.style.display = 'none'; }
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function openVideoLightbox(url) {
+      document.getElementById('lightboxImg').style.display = 'none';
+      let lv = document.getElementById('lightboxVideo');
+      if (!lv) {
+        lv = document.createElement('video');
+        lv.id = 'lightboxVideo';
+        lv.controls = true;
+        lv.style.cssText = 'max-width:90vw;max-height:90vh;border-radius:10px;display:block;';
+        document.querySelector('.lightbox-inner').appendChild(lv);
+      }
+      lv.src = url;
+      lv.style.display = 'block';
       document.getElementById('lightbox').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
     function closeLightbox() {
       document.getElementById('lightbox').classList.remove('open');
       document.body.style.overflow = '';
+      const lv = document.getElementById('lightboxVideo');
+      if (lv) lv.pause();
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
@@ -3872,6 +3918,21 @@
             document.getElementById('vidDownloadLink').href = data.video_url;
             document.getElementById('vidResult').style.display = 'block';
             showVidStatus('✓ Video generated!', 'success');
+            // Save to history
+            fetch('/api/save-video', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                video_url:   data.video_url,
+                prompt:      document.getElementById('vidPrompt').value.trim(),
+                model:       selectedVidModel,
+                ratio:       selectedVidRatio,
+                resolution:  selectedVidRes,
+                duration:    parseInt(document.getElementById('vidDurationSlider').value),
+                seed:        parseInt(document.getElementById('vidSeed').value),
+                with_audio:  document.getElementById('vidSound').checked,
+              })
+            }).catch(() => {});
           } else {
             // Succeeded but URL not found — log raw response for debugging
             console.error('[video] succeeded but no URL found. Raw response:', data.raw);

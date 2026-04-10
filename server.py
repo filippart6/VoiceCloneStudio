@@ -127,6 +127,12 @@ def init_db():
                 conn.execute(f'ALTER TABLE image_history ADD COLUMN {col} REAL DEFAULT {default}')
             except Exception:
                 pass
+        # Migrate: add media_type + video_meta columns to existing image_history
+        for col, default in [('media_type', "'image'"), ('video_meta', 'NULL')]:
+            try:
+                conn.execute(f'ALTER TABLE image_history ADD COLUMN {col} TEXT DEFAULT {default}')
+            except Exception:
+                pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS elements (
                 id          TEXT PRIMARY KEY,
@@ -489,11 +495,17 @@ def get_history():
     items = [dict(r) for r in rows]
     for item in items:
         fn = item['filename']
-        # filename now stores either a full URL (Drive) or just a filename (local)
         if fn.startswith('http') or fn.startswith('/uploads/'):
             item['image_url'] = fn
         else:
             item['image_url'] = f"/uploads/{fn}"
+        # Parse video metadata if present
+        if item.get('video_meta'):
+            try:
+                item['video_meta'] = json.loads(item['video_meta'])
+            except Exception:
+                item['video_meta'] = {}
+        item.setdefault('media_type', 'image')
 
     return jsonify({'items': items, 'total': total, 'page': page, 'per_page': per_page})
 
@@ -514,6 +526,43 @@ def delete_history(entry_id):
             img_path.unlink()
         conn.execute('DELETE FROM image_history WHERE id=?', (entry_id,))
     return jsonify({'success': True})
+
+
+# ── Save video to history ─────────────────────────────────────────────────────
+
+@app.route('/api/save-video', methods=['POST'])
+@login_required
+def save_video():
+    body = request.get_json()
+    if not body or not body.get('video_url'):
+        return jsonify({'error': 'video_url required'}), 400
+    user = session.get('username', 'admin')
+    entry_id = uuid.uuid4().hex
+    meta = {
+        'ratio':      body.get('ratio', 'Auto'),
+        'resolution': body.get('resolution', '1080p'),
+        'duration':   body.get('duration', 5),
+        'seed':       body.get('seed', -1),
+        'with_audio': body.get('with_audio', True),
+    }
+    with get_db() as conn:
+        conn.execute(
+            '''INSERT INTO image_history
+               (id,user,prompt,neg_prompt,size,model,filename,created_at,
+                guidance_scale,steps,media_type,video_meta)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
+            (entry_id, user,
+             body.get('prompt', ''),
+             '',
+             f"{meta['ratio']} · {meta['resolution']}",
+             body.get('model', ''),
+             body['video_url'],
+             datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+             0, 0,
+             'video',
+             json.dumps(meta))
+        )
+    return jsonify({'id': entry_id})
 
 
 # ── Elements routes ───────────────────────────────────────────────────────────
