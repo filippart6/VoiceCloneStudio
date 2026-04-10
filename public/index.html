@@ -1155,6 +1155,383 @@
       border-radius: 50%;
       animation: spin 0.9s linear infinite;
     }
+
+    /* ── Elements tab ── */
+    .elem-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .elem-slug-preview {
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-top: 5px;
+      min-height: 18px;
+      font-family: monospace;
+    }
+    .elem-type-row {
+      display: flex;
+      gap: 10px;
+    }
+    .elem-type-opt {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .elem-type-opt input { display: none; }
+    .elem-type-opt.selected {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(124,92,252,0.1);
+    }
+    .elem-img-strip {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .elem-img-thumb {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .elem-img-thumb-wrap {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    .elem-img-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .elem-img-thumb-remove {
+      position: absolute;
+      top: -6px; right: -6px;
+      width: 20px; height: 20px;
+      background: var(--error);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .elem-img-add {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      border: 1.5px dashed var(--border);
+      background: var(--surface2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .elem-img-add:hover { border-color: var(--accent); color: var(--accent); }
+    .elem-img-status {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      min-height: 18px;
+    }
+    .elem-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 4px;
+    }
+    .elem-column {}
+    .elem-col-header {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent2);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .elem-list { display: flex; flex-direction: column; gap: 12px; }
+    .elem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .elem-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .elem-card-info {}
+    .elem-card-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .elem-card-slug {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+    .elem-card-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .elem-card-thumbs {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .elem-card-thumbs img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .elem-card-del {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .elem-card-del:hover { border-color: var(--error); color: var(--error); }
+    .elem-empty {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    /* ── Video model selector ── */
+    .vid-model-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .vid-model-opt {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 11px 16px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 160px;
+    }
+    .vid-model-opt:hover:not(.disabled) { border-color: var(--accent); }
+    .vid-model-opt.selected {
+      border-color: var(--accent);
+      background: rgba(124,92,252,0.1);
+    }
+    .vid-model-opt.disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+    .vid-model-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .vid-model-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .vid-model-dot.ready { background: var(--success); }
+    .vid-model-dot.soon  { background: var(--border); }
+    .vid-model-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      align-self: flex-start;
+    }
+    .vid-model-tag.tag-ready { background: rgba(52,211,153,0.15); color: var(--success); }
+    .vid-model-tag.tag-soon  { background: rgba(136,136,170,0.15); color: var(--text-muted); }
+    .vid-model-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* ── Video settings ── */
+    .vid-ratio-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .vid-ratio-opt, .vid-res-opt {
+      padding: 7px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .vid-ratio-opt:hover, .vid-res-opt:hover { border-color: var(--accent); color: var(--text); }
+    .vid-ratio-opt.selected, .vid-res-opt.selected {
+      border-color: var(--accent);
+      background: rgba(124,92,252,0.12);
+      color: var(--text);
+    }
+    .vid-res-row { display: flex; gap: 8px; }
+
+    /* ── Video tab ── */
+    .video-frames-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .video-frame-slot { flex: 1; }
+    .video-frame-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .req-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: rgba(124,92,252,0.15);
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .video-frame-arrow {
+      padding-top: 52px;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .video-dropzone {
+      background: var(--surface2);
+      border: 1.5px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+    .video-dropzone:hover, .video-dropzone.dragover { border-color: var(--accent); background: rgba(124,92,252,0.08); }
+    .video-frame-preview {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .video-frame-preview img {
+      width: 100%;
+      border-radius: 12px;
+      display: block;
+      max-height: 200px;
+      object-fit: cover;
+    }
+    .video-frame-preview .ref-remove {
+      position: absolute;
+      top: 8px; right: 8px;
+    }
+    .video-frame-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      min-height: 18px;
+    }
+    .vid-duration-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .batch-stepper-btn {
+      width: 32px; height: 32px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .batch-stepper-btn:hover { border-color: var(--accent); }
+    #vidDurationDisplay {
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-width: 24px;
+      text-align: center;
+    }
+    .vid-poll {
+      margin-top: 20px;
+    }
+    .vid-poll-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .vid-pulse {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse-ring 1.4s ease-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(124,92,252,0.6); }
+      70%  { box-shadow: 0 0 0 10px rgba(124,92,252,0); }
+      100% { box-shadow: 0 0 0 0 rgba(124,92,252,0); }
+    }
+    #vidPollMsg { color: var(--text-muted); font-size: 0.875rem; }
   </style>
 </head>
 <body>
@@ -1188,6 +1565,14 @@
           <span class="tab-dot"></span>
           History
           <span id="historyCount" style="display:none;background:var(--accent);color:#fff;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:10px;margin-left:2px;"></span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('elements', this)">
+          <span class="tab-dot"></span>
+          Elements
+        </button>
+        <button class="tab-btn" onclick="switchTab('video', this)">
+          <span class="tab-dot"></span>
+          Video
         </button>
       </nav>
       <a href="/logout" class="signout">Sign out</a>
@@ -1791,6 +2176,246 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════ ELEMENTS TAB -->
+  <div class="tab-panel" id="tab-elements">
+    <div class="page" style="max-width:900px;">
+      <div class="page-header">
+        <h2>Elements</h2>
+        <p>Create named characters and locations — reference them in any prompt with <code style="background:var(--surface2);padding:2px 7px;border-radius:6px;font-size:0.85em;">@name</code></p>
+      </div>
+
+      <!-- Create form -->
+      <div class="card" id="elemCreateCard">
+        <div class="card-title">New Element</div>
+        <div class="elem-form-grid">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" id="elemLabel" placeholder="e.g. Sarah Connor" oninput="updateElemSlug()" />
+            <div class="elem-slug-preview" id="elemSlugPreview"></div>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <div class="elem-type-row">
+              <label class="elem-type-opt selected" id="elemTypeChar" onclick="selectElemType('character')">
+                <input type="radio" name="elemType" value="character" checked /> Character
+              </label>
+              <label class="elem-type-opt" id="elemTypeLoc" onclick="selectElemType('location')">
+                <input type="radio" name="elemType" value="location" /> Location
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Description <span style="color:var(--text-muted);font-weight:400;">(optional — helps guide the AI)</span></label>
+          <textarea id="elemDesc" placeholder="e.g. A woman in her 30s, dark hair, sharp eyes, always in black clothing" style="min-height:60px;"></textarea>
+        </div>
+        <div class="field">
+          <label>Reference Images <span style="color:var(--text-muted);font-weight:400;">(1–4 photos)</span></label>
+          <div class="elem-img-strip" id="elemImgStrip">
+            <label class="elem-img-add" id="elemImgAdd" for="elemImgFile">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add photo
+            </label>
+            <input type="file" id="elemImgFile" accept="image/png,image/jpeg,image/webp" style="display:none;" multiple onchange="onElemImgPick(this)" />
+          </div>
+          <div class="elem-img-status" id="elemImgStatus"></div>
+        </div>
+        <button class="btn btn-primary" id="elemCreateBtn" onclick="createElement()" disabled style="margin-top:4px;">
+          <div class="spinner"></div>
+          <span class="btn-text">Create Element</span>
+        </button>
+        <div class="status" id="elemCreateStatus"></div>
+      </div>
+
+      <!-- Elements list -->
+      <div class="elem-columns" id="elemColumns">
+        <div class="elem-column">
+          <div class="elem-col-header">Characters</div>
+          <div id="elemListChar" class="elem-list"></div>
+        </div>
+        <div class="elem-column">
+          <div class="elem-col-header">Locations</div>
+          <div id="elemListLoc" class="elem-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ VIDEO TAB -->
+  <div class="tab-panel" id="tab-video">
+    <div class="page">
+      <div class="page-header">
+        <h2>Video Generation</h2>
+        <p>Animate a still image into video with Seedance 1.5 — upload a start frame and describe the motion</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Model</div>
+        <div class="vid-model-grid" id="vidModelGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Frames</div>
+        <div class="video-frames-row">
+          <!-- Start frame -->
+          <div class="video-frame-slot">
+            <div class="video-frame-label">Start Frame <span class="req-badge">required</span></div>
+            <div class="video-dropzone" id="vidStartZone" onclick="document.getElementById('vidStartFile').click()">
+              <input type="file" id="vidStartFile" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="onVidFramePick(this,'start')" />
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Drop or click to upload</span>
+            </div>
+            <div class="video-frame-preview" id="vidStartPreview" style="display:none;">
+              <img id="vidStartThumb" src="" alt="Start frame" />
+              <button class="ref-remove" onclick="removeVidFrame('start')">✕</button>
+            </div>
+            <div class="video-frame-status" id="vidStartStatus"></div>
+          </div>
+          <!-- Arrow -->
+          <div class="video-frame-arrow">→</div>
+          <!-- End frame -->
+          <div class="video-frame-slot">
+            <div class="video-frame-label">End Frame <span style="color:var(--text-muted);font-size:0.75rem;">(optional)</span></div>
+            <div class="video-dropzone" id="vidEndZone" onclick="document.getElementById('vidEndFile').click()">
+              <input type="file" id="vidEndFile" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="onVidFramePick(this,'end')" />
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Drop or click to upload</span>
+            </div>
+            <div class="video-frame-preview" id="vidEndPreview" style="display:none;">
+              <img id="vidEndThumb" src="" alt="End frame" />
+              <button class="ref-remove" onclick="removeVidFrame('end')">✕</button>
+            </div>
+            <div class="video-frame-status" id="vidEndStatus"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Motion Prompt</div>
+        <div class="at-anchor" style="position:relative;">
+          <textarea id="vidPrompt" placeholder="Describe the motion — e.g. 'the camera slowly zooms in, leaves rustle in the breeze'" style="min-height:90px;" oninput="handleVidAtKey(event)" onkeyup="handleVidAtKey(event)" onclick="hideVidAtDropdown()"></textarea>
+          <div class="at-dropdown" id="vidAtDropdown"></div>
+        </div>
+        <div class="at-tag-bar" id="vidAtTagBar"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Settings</div>
+
+        <!-- Ratio -->
+        <div class="field">
+          <label>Ratio</label>
+          <div class="vid-ratio-grid" id="vidRatioGrid"></div>
+        </div>
+
+        <!-- Resolution -->
+        <div class="field">
+          <label>Resolution</label>
+          <div class="vid-res-row" id="vidResRow"></div>
+        </div>
+
+        <!-- Duration -->
+        <div class="field">
+          <label>Duration</label>
+          <div class="vid-duration-row">
+            <input type="range" id="vidDurationSlider" min="4" max="12" value="5"
+              style="flex:1;accent-color:var(--accent);"
+              oninput="vidDuration=+this.value;document.getElementById('vidDurationDisplay').textContent=this.value" />
+            <span id="vidDurationDisplay" style="min-width:28px;text-align:center;font-weight:600;">5</span>
+            <span style="color:var(--text-muted);font-size:0.82rem;">s</span>
+          </div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="field">
+          <label>Quantity</label>
+          <div class="vid-duration-row">
+            <input type="range" id="vidQuantitySlider" min="1" max="4" value="1"
+              style="flex:1;accent-color:var(--accent);"
+              oninput="document.getElementById('vidQuantityDisplay').textContent=this.value" />
+            <span id="vidQuantityDisplay" style="min-width:28px;text-align:center;font-weight:600;">1</span>
+            <span style="color:var(--text-muted);font-size:0.82rem;">video(s)</span>
+          </div>
+        </div>
+
+        <!-- Seed -->
+        <div class="field">
+          <label>Seed <span style="color:var(--text-muted);font-weight:400;font-size:0.78rem;">(-1 = random)</span></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="vidSeed" value="-1" min="-1"
+              style="flex:1;" />
+            <button onclick="document.getElementById('vidSeed').value=Math.floor(Math.random()*2147483647)"
+              style="padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);cursor:pointer;font-size:1rem;transition:border-color 0.2s;"
+              title="Randomize seed">⚄</button>
+          </div>
+        </div>
+
+        <!-- Toggles -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+          <label class="toggle-field" onclick="toggleVidOption('vidSound')">
+            <div class="toggle-info">
+              <div class="toggle-label-text">Output sound</div>
+              <div class="toggle-desc">Generate ambient audio alongside the video</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" id="vidSound" checked />
+              <span class="toggle-track"></span>
+            </div>
+          </label>
+          <label class="toggle-field" onclick="toggleVidOption('vidDraft')">
+            <div class="toggle-info">
+              <div class="toggle-label-text">Draft mode</div>
+              <div class="toggle-desc">Faster generation, lower quality — good for testing</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" id="vidDraft" />
+              <span class="toggle-track"></span>
+            </div>
+          </label>
+          <label class="toggle-field" onclick="toggleVidOption('vidFixedLens')">
+            <div class="toggle-info">
+              <div class="toggle-label-text">Fixed lens</div>
+              <div class="toggle-desc">Lock camera position — no camera movement</div>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" id="vidFixedLens" />
+              <span class="toggle-track"></span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div id="vidStatus" class="status"></div>
+
+      <button class="btn btn-primary" id="vidBtn" onclick="generateVideo()" disabled>
+        <div class="spinner"></div>
+        <span class="btn-text">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-3px;margin-right:6px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Generate Video
+        </span>
+      </button>
+
+      <!-- Result -->
+      <div class="vid-result" id="vidResult" style="display:none;">
+        <div class="card" style="margin-top:20px;">
+          <div class="card-title">Generated Video</div>
+          <video id="vidPlayer" controls style="width:100%;border-radius:10px;background:#000;"></video>
+          <div style="display:flex;gap:10px;margin-top:14px;">
+            <a id="vidDownloadLink" href="#" download="generated-video.mp4" class="btn btn-primary" style="text-decoration:none;text-align:center;flex:1;padding:11px;">↓ Download</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Poll progress -->
+      <div class="vid-poll" id="vidPoll" style="display:none;">
+        <div class="vid-poll-inner">
+          <div class="vid-pulse"></div>
+          <span id="vidPollMsg">Generating your video…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Prompt modal -->
   <div class="prompt-modal" id="promptModal" onclick="closePromptModal()">
     <div class="prompt-modal-box" onclick="event.stopPropagation()">
@@ -2052,42 +2677,67 @@
       document.getElementById('imgPrompt').placeholder = 'A cinematic portrait of an astronaut floating in deep space, ultra realistic, dramatic lighting…';
     }
 
+    // ── Elements cache ────────────────────────────────────
+    let elements = [];
+
+    async function loadElements() {
+      try {
+        const res = await fetch('/api/elements');
+        const data = await res.json();
+        elements = data.elements || [];
+        renderElementsList();
+      } catch(e) { console.error('loadElements:', e); }
+    }
+
     // ── @ mention ─────────────────────────────────────────
     const atDropdown = document.getElementById('atDropdown');
     const atTagBar   = document.getElementById('atTagBar');
     let atTriggerIndex = -1;
+    let activeAtTextarea = null;  // tracks which textarea triggered the dropdown
 
-    imgPrompt.addEventListener('keyup', handleAtKey);
+    imgPrompt.addEventListener('keyup', e => handleAtKeyFor(e, imgPrompt, atDropdown, atTriggerIndex, idx => { atTriggerIndex = idx; }));
     imgPrompt.addEventListener('click', hideAtDropdown);
     document.addEventListener('click', e => {
-      if (!e.target.closest('.at-anchor')) hideAtDropdown();
+      if (!e.target.closest('.at-anchor')) { hideAtDropdown(); hideVidAtDropdown(); }
     });
 
     function handleAtKey(e) {
-      if (e.key === 'Escape') { hideAtDropdown(); return; }
-      const val  = imgPrompt.value;
-      const pos  = imgPrompt.selectionStart;
+      handleAtKeyFor(e, imgPrompt, atDropdown, atTriggerIndex, idx => { atTriggerIndex = idx; });
+    }
+
+    function handleAtKeyFor(e, textarea, dropdown, triggerIdx, setIdx) {
+      if (e.key === 'Escape') { dropdown.classList.remove('visible'); setIdx(-1); return; }
+      const val  = textarea.value;
+      const pos  = textarea.selectionStart;
       const before = val.slice(0, pos);
       const atIdx  = before.lastIndexOf('@');
+      const query  = atIdx >= 0 ? before.slice(atIdx + 1) : '';
 
       if (atIdx === -1 || before.slice(atIdx).includes(' ')) {
-        hideAtDropdown();
+        dropdown.classList.remove('visible');
+        setIdx(-1);
       } else {
-        atTriggerIndex = atIdx;
-        renderAtDropdown();
+        setIdx(atIdx);
+        renderAtDropdownFor(dropdown, textarea, atIdx, query);
       }
-      syncAtTagBar();
+      if (textarea === imgPrompt) syncAtTagBar();
     }
 
     function renderAtDropdown() {
-      if (!refImageBase64) {
-        atDropdown.innerHTML = `<div class="at-dropdown-empty">Upload a reference image first to use @mentions</div>`;
-      } else {
+      renderAtDropdownFor(atDropdown, imgPrompt, atTriggerIndex, '');
+    }
+
+    function renderAtDropdownFor(dropdown, textarea, triggerIdx, query) {
+      const q = query.toLowerCase();
+      let html = '';
+
+      // @image option (only for image prompt)
+      if (textarea === imgPrompt && refImageBase64 && (!q || 'image'.startsWith(q))) {
         const thumb = document.getElementById('refThumb')?.src || '';
         const fname = document.getElementById('refFileName')?.textContent || 'reference image';
-        atDropdown.innerHTML = `
-          <div class="at-dropdown-header">Reference Images</div>
-          <div class="at-dropdown-item" onclick="insertAtToken('@image')">
+        html += `
+          <div class="at-dropdown-header">Reference Image</div>
+          <div class="at-dropdown-item" onclick="insertAtTokenInto(imgPrompt, '@image', ${triggerIdx})">
             <img src="${thumb}" alt="ref" />
             <div>
               <div class="at-dropdown-item-name">@image</div>
@@ -2095,7 +2745,30 @@
             </div>
           </div>`;
       }
-      atDropdown.classList.add('visible');
+
+      // Element options
+      const matching = elements.filter(el => !q || el.name.includes(q) || el.label.toLowerCase().includes(q));
+      if (matching.length > 0) {
+        html += `<div class="at-dropdown-header">Elements</div>`;
+        matching.forEach(el => {
+          const thumb = el.images[0] || '';
+          html += `
+            <div class="at-dropdown-item" onclick="insertAtTokenInto(${textarea === imgPrompt ? 'imgPrompt' : 'document.getElementById(\'vidPrompt\')'}, '@${el.name}', ${triggerIdx})">
+              ${thumb ? `<img src="${thumb}" alt="${el.label}" />` : `<span style="width:32px;height:32px;background:var(--surface2);border-radius:6px;display:inline-block;"></span>`}
+              <div>
+                <div class="at-dropdown-item-name">@${el.name}</div>
+                <div class="at-dropdown-item-hint">${el.label} · ${el.type}</div>
+              </div>
+            </div>`;
+        });
+      }
+
+      if (!html) {
+        html = `<div class="at-dropdown-empty">${elements.length === 0 && !refImageBase64 ? 'Upload a reference image or create an Element first' : 'No matches'}</div>`;
+      }
+
+      dropdown.innerHTML = html;
+      dropdown.classList.add('visible');
     }
 
     function hideAtDropdown() {
@@ -2104,28 +2777,43 @@
     }
 
     function insertAtToken(token) {
-      const val = imgPrompt.value;
-      const pos = imgPrompt.selectionStart;
-      // Replace from @ trigger to cursor
-      const before = val.slice(0, atTriggerIndex);
+      insertAtTokenInto(imgPrompt, token, atTriggerIndex);
+    }
+
+    function insertAtTokenInto(textarea, token, triggerIdx) {
+      const val = textarea.value;
+      const pos = textarea.selectionStart;
+      const before = val.slice(0, triggerIdx);
       const after  = val.slice(pos);
-      imgPrompt.value = before + token + ' ' + after;
-      const newPos = atTriggerIndex + token.length + 1;
-      imgPrompt.setSelectionRange(newPos, newPos);
+      textarea.value = before + token + ' ' + after;
+      const newPos = triggerIdx + token.length + 1;
+      textarea.setSelectionRange(newPos, newPos);
+      // Hide all dropdowns
       hideAtDropdown();
-      syncAtTagBar();
-      imgBtn.disabled = !imgPrompt.value.trim();
-      imgPrompt.focus();
+      hideVidAtDropdown();
+      if (textarea === imgPrompt) {
+        syncAtTagBar();
+        imgBtn.disabled = !imgPrompt.value.trim();
+      } else {
+        updateVidBtn();
+      }
+      textarea.focus();
     }
 
     function syncAtTagBar() {
-      if (/@image\b/.test(imgPrompt.value) && refImageBase64) {  // refImageBase64 used for preview only
+      const tags = [];
+      if (/@image\b/.test(imgPrompt.value) && refImageBase64) {
         const thumb = document.getElementById('refThumb')?.src || '';
-        atTagBar.innerHTML = `
-          <div class="at-tag">
-            <img src="${thumb}" alt="ref" />
-            @image — reference photo will guide this generation
-          </div>`;
+        tags.push(`<div class="at-tag"><img src="${thumb}" alt="ref" />@image — reference photo will guide this generation</div>`);
+      }
+      elements.forEach(el => {
+        if (new RegExp(`@${el.name}\\b`, 'i').test(imgPrompt.value)) {
+          const thumb = el.images[0] || '';
+          tags.push(`<div class="at-tag">${thumb ? `<img src="${thumb}" alt="${el.label}" />` : ''}@${el.name} — ${el.label}</div>`);
+        }
+      });
+      if (tags.length) {
+        atTagBar.innerHTML = tags.join('');
         atTagBar.classList.add('visible');
       } else {
         atTagBar.classList.remove('visible');
@@ -2133,10 +2821,33 @@
     }
 
     function buildFinalPrompt(userPrompt) {
-      // Expand @image to natural language for the model
-      let prompt = userPrompt.replace(/@image\b/gi, 'following the composition and style of the reference image');
+      let prompt = userPrompt;
+      // Expand @image
+      prompt = prompt.replace(/@image\b/gi, 'following the composition and style of the reference image');
+      // Expand element @mentions
+      elements.forEach(el => {
+        const desc = el.description ||
+          (el.type === 'character' ? 'this character' : 'this location');
+        const imgRefs = el.images.length
+          ? `, reference images: ${el.images.join(', ')}`
+          : '';
+        prompt = prompt.replace(
+          new RegExp(`@${el.name}\\b`, 'gi'),
+          `[${el.label}: ${desc}${imgRefs}]`
+        );
+      });
       if (!activePresetSuffix) return prompt;
       return `${prompt}, ${activePresetSuffix}`;
+    }
+
+    // Return the first element image URL mentioned in the prompt (for reference_image_url)
+    function getElementRefUrl(userPrompt) {
+      for (const el of elements) {
+        if (new RegExp(`@${el.name}\\b`, 'i').test(userPrompt) && el.images[0]) {
+          return el.images[0];
+        }
+      }
+      return null;
     }
 
     // ── Batch generation ──────────────────────────────────
@@ -2174,8 +2885,11 @@
       results.classList.add('visible');
 
       // Fire all in parallel
+      // Determine reference image: explicit upload > Drive selection > first element image
+      const elemRefUrl = getElementRefUrl(userPrompt);
+
       const jobs = Array.from({length: count}, (_, i) =>
-        generateSingle(i, finalPrompt, negPrompt, width, height)
+        generateSingle(i, finalPrompt, negPrompt, width, height, elemRefUrl)
       );
       const settled = await Promise.allSettled(jobs);
 
@@ -2192,22 +2906,23 @@
       imgBtn.disabled = !imgPrompt.value.trim();
     }
 
-    async function generateSingle(index, prompt, negPrompt, width, height) {
+    async function generateSingle(index, prompt, negPrompt, width, height, elemRefUrl) {
       const slot = document.getElementById(`bitem-${index}`);
       try {
+        // Priority: uploaded file b64 > Drive selection > element reference image
+        const driveUrl = document.getElementById('refPreview')?.dataset.driveUrl;
+        const refPayload = refImageBase64
+          ? { reference_image_b64: refImageBase64 }
+          : driveUrl
+            ? { reference_image_url: driveUrl }
+            : elemRefUrl
+              ? { reference_image_url: elemRefUrl }
+              : {};
+
         const res = await fetch('/api/generate-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt,
-            negative_prompt: negPrompt,
-            width, height,
-            ...(refImageBase64
-              ? { reference_image_b64: refImageBase64 }
-              : document.getElementById('refPreview')?.dataset.driveUrl
-                ? { reference_image_url: document.getElementById('refPreview').dataset.driveUrl }
-                : {})
-          })
+          body: JSON.stringify({ prompt, negative_prompt: negPrompt, width, height, ...refPayload })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
@@ -2456,14 +3171,33 @@
     function handleRefImage(file) {
       const reader = new FileReader();
       reader.onload = e => {
-        refImageBase64 = e.target.result; // full data URL
+        refImageBase64 = e.target.result; // keep as fallback
         document.getElementById('refThumb').src = e.target.result;
         document.getElementById('refFileName').textContent = file.name;
         document.getElementById('refPreview').classList.add('visible');
+        delete document.getElementById('refPreview').dataset.driveUrl;
         refDropzone.style.display = 'none';
         syncAtTagBar();
       };
       reader.readAsDataURL(file);
+
+      // Also upload to Drive in background — gives Seedream a real HTTPS URL
+      const fd = new FormData();
+      fd.append('image', file);
+      fetch('/api/elements/upload-image', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+          if (data.url) {
+            // Store Drive URL; generateSingle will prefer this over base64
+            document.getElementById('refPreview').dataset.driveUrl = data.url;
+            refImageBase64 = null; // Drive URL is now the source of truth
+            console.log('[ref-image] uploaded to Drive:', data.url);
+          }
+        })
+        .catch(() => {
+          // Drive upload failed — base64 fallback remains active
+          console.warn('[ref-image] Drive upload failed, using base64 fallback');
+        });
     }
 
     function removeRefImage() {
@@ -2703,24 +3437,463 @@
       a.click();
     }
 
-    // Patch tab switching to load history when opening that tab
+    // Patch tab switching to load history/elements when opening those tabs
     const _origSwitchTab = switchTab;
     window.switchTab = function(name, btn) {
       _origSwitchTab(name, btn);
       if (name === 'history') loadHistory();
+      if (name === 'elements') loadElements();
     };
 
-    // After successful image generation, prepend to history grid if on history tab
+    // After successful image generation, refresh count badge
     const _origGenerate = generateImage;
     window.generateImage = async function() {
       await _origGenerate();
-      // Refresh count badge in background
       fetch('/api/history?page=1&per_page=1').then(r => r.json()).then(d => {
         historyTotal = d.total;
         const badge = document.getElementById('historyCount');
         if (d.total > 0) { badge.textContent = d.total; badge.style.display = 'inline'; }
       }).catch(() => {});
     };
+
+    // ── Elements UI ───────────────────────────────────────
+    let elemSelectedType = 'character';
+    let elemUploadedImages = []; // array of { url, localSrc }
+
+    function selectElemType(type) {
+      elemSelectedType = type;
+      document.getElementById('elemTypeChar').classList.toggle('selected', type === 'character');
+      document.getElementById('elemTypeLoc').classList.toggle('selected', type === 'location');
+    }
+
+    function updateElemSlug() {
+      const label = document.getElementById('elemLabel').value.trim();
+      const slug = label.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/^-|-$/g, '');
+      const preview = document.getElementById('elemSlugPreview');
+      preview.textContent = slug ? `@${slug}` : '';
+      document.getElementById('elemCreateBtn').disabled = !label || elemUploadedImages.length === 0;
+    }
+
+    async function onElemImgPick(input) {
+      const files = Array.from(input.files);
+      const remaining = 4 - elemUploadedImages.length;
+      const toUpload = files.slice(0, remaining);
+      if (toUpload.length === 0) return;
+
+      const statusEl = document.getElementById('elemImgStatus');
+      statusEl.textContent = `Uploading ${toUpload.length} image(s)…`;
+
+      for (const file of toUpload) {
+        const localSrc = await readFileAsDataURL(file);
+        const fd = new FormData();
+        fd.append('image', file);
+        try {
+          const res = await fetch('/api/elements/upload-image', { method: 'POST', body: fd });
+          const data = await res.json();
+          if (data.url) {
+            elemUploadedImages.push({ url: data.url, localSrc });
+            renderElemImgStrip();
+          }
+        } catch(e) {
+          statusEl.textContent = 'Upload failed: ' + e.message;
+        }
+      }
+
+      statusEl.textContent = elemUploadedImages.length > 0 ? `${elemUploadedImages.length} image(s) ready` : '';
+      document.getElementById('elemCreateBtn').disabled =
+        !document.getElementById('elemLabel').value.trim() || elemUploadedImages.length === 0;
+      // Reset file input so same file can be re-picked
+      input.value = '';
+    }
+
+    function renderElemImgStrip() {
+      const strip = document.getElementById('elemImgStrip');
+      const addBtn = document.getElementById('elemImgAdd');
+      // Remove existing thumb wraps (not the add button)
+      strip.querySelectorAll('.elem-img-thumb-wrap').forEach(el => el.remove());
+
+      elemUploadedImages.forEach((img, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'elem-img-thumb-wrap';
+        wrap.innerHTML = `
+          <img src="${img.localSrc}" alt="image ${i+1}" />
+          <button class="elem-img-thumb-remove" onclick="removeElemImg(${i})">✕</button>`;
+        strip.insertBefore(wrap, addBtn);
+      });
+
+      // Hide add button if at max
+      addBtn.style.display = elemUploadedImages.length >= 4 ? 'none' : 'flex';
+    }
+
+    function removeElemImg(index) {
+      elemUploadedImages.splice(index, 1);
+      renderElemImgStrip();
+      document.getElementById('elemImgStatus').textContent =
+        elemUploadedImages.length > 0 ? `${elemUploadedImages.length} image(s) ready` : '';
+      document.getElementById('elemCreateBtn').disabled =
+        !document.getElementById('elemLabel').value.trim() || elemUploadedImages.length === 0;
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function createElement() {
+      const label = document.getElementById('elemLabel').value.trim();
+      if (!label || elemUploadedImages.length === 0) return;
+
+      const btn = document.getElementById('elemCreateBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      const statusEl = document.getElementById('elemCreateStatus');
+      statusEl.className = 'status';
+
+      try {
+        const res = await fetch('/api/elements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            label,
+            type: elemSelectedType,
+            images: elemUploadedImages.map(i => i.url),
+            description: document.getElementById('elemDesc').value.trim()
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+
+        // Reset form
+        document.getElementById('elemLabel').value = '';
+        document.getElementById('elemDesc').value = '';
+        document.getElementById('elemSlugPreview').textContent = '';
+        elemUploadedImages = [];
+        renderElemImgStrip();
+        document.getElementById('elemImgStatus').textContent = '';
+
+        await loadElements();
+        statusEl.textContent = `✓ @${data.name} created`;
+        statusEl.className = 'status visible success';
+        setTimeout(() => statusEl.className = 'status', 3000);
+      } catch(e) {
+        statusEl.textContent = '✗ ' + e.message;
+        statusEl.className = 'status visible error';
+      }
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    async function deleteElement(id) {
+      if (!confirm('Delete this element?')) return;
+      await fetch(`/api/elements/${id}`, { method: 'DELETE' });
+      await loadElements();
+    }
+
+    function renderElementsList() {
+      const chars = elements.filter(e => e.type === 'character');
+      const locs  = elements.filter(e => e.type === 'location');
+
+      function cardHTML(el) {
+        const thumbs = el.images.map(u => `<img src="${u}" alt="${el.label}" onerror="this.style.display='none'" />`).join('');
+        return `
+          <div class="elem-card" id="ecard-${el.id}">
+            <div class="elem-card-header">
+              <div class="elem-card-info">
+                <div class="elem-card-label">${el.label}</div>
+                <div class="elem-card-slug">@${el.name}</div>
+                ${el.description ? `<div class="elem-card-desc">${el.description}</div>` : ''}
+              </div>
+              <button class="elem-card-del" onclick="deleteElement('${el.id}')">✕ Delete</button>
+            </div>
+            <div class="elem-card-thumbs">${thumbs}</div>
+          </div>`;
+      }
+
+      document.getElementById('elemListChar').innerHTML =
+        chars.length ? chars.map(cardHTML).join('') : '<div class="elem-empty">No characters yet</div>';
+      document.getElementById('elemListLoc').innerHTML =
+        locs.length ? locs.map(cardHTML).join('') : '<div class="elem-empty">No locations yet</div>';
+    }
+
+    // Load elements on page load so @mentions work immediately
+    loadElements();
+
+    // ── Video generation ──────────────────────────────────
+    const VID_MODELS = [
+      {
+        id: 'seedance-1-5-pro',
+        name: 'Seedance 1.5 Pro',
+        desc: '1080p · image-to-video',
+        available: true,
+      },
+      {
+        id: 'seedance-2-0',
+        name: 'Seedance 2.0',
+        desc: 'Next-gen · coming soon',
+        available: false,
+      },
+      {
+        id: 'kling-3-0',
+        name: 'Kling 3.0',
+        desc: 'Kuaishou · different API',
+        available: false,
+      },
+    ];
+    let selectedVidModel = VID_MODELS[0].id;
+
+    function renderVidModels() {
+      const grid = document.getElementById('vidModelGrid');
+      grid.innerHTML = VID_MODELS.map(m => `
+        <div class="vid-model-opt${m.id === selectedVidModel ? ' selected' : ''}${m.available ? '' : ' disabled'}"
+             id="vmod-${m.id}"
+             onclick="${m.available ? `selectVidModel('${m.id}')` : 'void(0)'}">
+          <div class="vid-model-name">
+            <span class="vid-model-dot ${m.available ? 'ready' : 'soon'}"></span>
+            ${m.name}
+          </div>
+          <span class="vid-model-tag ${m.available ? 'tag-ready' : 'tag-soon'}">${m.available ? 'Ready' : 'Soon'}</span>
+          <div class="vid-model-desc">${m.desc}</div>
+        </div>`).join('');
+    }
+
+    function selectVidModel(id) {
+      selectedVidModel = id;
+      document.querySelectorAll('.vid-model-opt').forEach(el => el.classList.remove('selected'));
+      document.getElementById(`vmod-${id}`)?.classList.add('selected');
+    }
+
+    renderVidModels();
+
+    // ── Video ratio + resolution selectors ───────────────
+    const VID_RATIOS = ['Auto', '16:9', '9:16', '1:1', '4:3', '3:4', '21:9'];
+    const VID_RESOLUTIONS = ['480p', '720p', '1080p'];
+    let selectedVidRatio = 'Auto';
+    let selectedVidRes   = '1080p';
+
+    function renderVidRatioRes() {
+      document.getElementById('vidRatioGrid').innerHTML = VID_RATIOS.map(r => `
+        <button class="vid-ratio-opt${r === selectedVidRatio ? ' selected' : ''}"
+          onclick="selectVidRatio('${r}')">${r}</button>`).join('');
+      document.getElementById('vidResRow').innerHTML = VID_RESOLUTIONS.map(r => `
+        <button class="vid-res-opt${r === selectedVidRes ? ' selected' : ''}"
+          onclick="selectVidRes('${r}')">${r}</button>`).join('');
+    }
+
+    function selectVidRatio(r) {
+      selectedVidRatio = r;
+      document.querySelectorAll('.vid-ratio-opt').forEach(el => el.classList.remove('selected'));
+      event.target.classList.add('selected');
+    }
+
+    function selectVidRes(r) {
+      selectedVidRes = r;
+      document.querySelectorAll('.vid-res-opt').forEach(el => el.classList.remove('selected'));
+      event.target.classList.add('selected');
+    }
+
+    function toggleVidOption(id) {
+      const cb = document.getElementById(id);
+      cb.checked = !cb.checked;
+    }
+
+    renderVidRatioRes();
+
+    // ── Video dropzone drag-and-drop ──────────────────────
+    ['vidStartZone', 'vidEndZone'].forEach(zoneId => {
+      const zone = document.getElementById(zoneId);
+      const slot = zoneId === 'vidStartZone' ? 'start' : 'end';
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) onVidFramePick({ files: [file], value: '' }, slot);
+      });
+    });
+
+    let vidStartUrl = '';
+    let vidEndUrl   = '';
+    let vidDuration = 5;
+    let vidPollTimer = null;
+
+    function changeVidDuration(delta) {
+      vidDuration = Math.max(4, Math.min(12, vidDuration + delta));
+      document.getElementById('vidDurationDisplay').textContent = vidDuration;
+    }
+
+    function updateVidBtn() {
+      document.getElementById('vidBtn').disabled = !vidStartUrl;
+    }
+
+    async function onVidFramePick(input, slot) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById(slot === 'start' ? 'vidStartStatus' : 'vidEndStatus');
+      statusEl.textContent = 'Uploading…';
+
+      const localSrc = await readFileAsDataURL(file);
+      const thumb = document.getElementById(slot === 'start' ? 'vidStartThumb' : 'vidEndThumb');
+      thumb.src = localSrc;
+
+      const fd = new FormData();
+      fd.append('image', file);
+      try {
+        const res = await fetch('/api/elements/upload-image', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!data.url) throw new Error('No URL returned');
+
+        if (slot === 'start') {
+          vidStartUrl = data.url;
+          document.getElementById('vidStartZone').style.display = 'none';
+          document.getElementById('vidStartPreview').style.display = 'block';
+          statusEl.textContent = 'Uploaded to Drive';
+        } else {
+          vidEndUrl = data.url;
+          document.getElementById('vidEndZone').style.display = 'none';
+          document.getElementById('vidEndPreview').style.display = 'block';
+          statusEl.textContent = 'Uploaded to Drive';
+        }
+        updateVidBtn();
+      } catch(e) {
+        statusEl.textContent = 'Upload failed: ' + e.message;
+      }
+      input.value = '';
+    }
+
+    function removeVidFrame(slot) {
+      if (slot === 'start') {
+        vidStartUrl = '';
+        document.getElementById('vidStartZone').style.display = '';
+        document.getElementById('vidStartPreview').style.display = 'none';
+        document.getElementById('vidStartStatus').textContent = '';
+      } else {
+        vidEndUrl = '';
+        document.getElementById('vidEndZone').style.display = '';
+        document.getElementById('vidEndPreview').style.display = 'none';
+        document.getElementById('vidEndStatus').textContent = '';
+      }
+      updateVidBtn();
+    }
+
+    // Video @mention
+    let vidAtTriggerIndex = -1;
+    const vidAtDropdown = document.getElementById('vidAtDropdown');
+    const vidAtTagBar   = document.getElementById('vidAtTagBar');
+
+    function handleVidAtKey(e) {
+      handleAtKeyFor(e, document.getElementById('vidPrompt'), vidAtDropdown, vidAtTriggerIndex, idx => { vidAtTriggerIndex = idx; });
+    }
+    function hideVidAtDropdown() {
+      vidAtDropdown.classList.remove('visible');
+      vidAtTriggerIndex = -1;
+    }
+
+    async function generateVideo() {
+      if (!vidStartUrl) return;
+
+      const btn = document.getElementById('vidBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      document.getElementById('vidResult').style.display = 'none';
+      document.getElementById('vidPoll').style.display = 'none';
+
+      const prompt = document.getElementById('vidPrompt').value.trim();
+      showVidStatus('Submitting video job…', 'info');
+
+      try {
+        const seed = parseInt(document.getElementById('vidSeed').value, 10);
+        const quantity = parseInt(document.getElementById('vidQuantitySlider').value, 10);
+        const body = {
+          start_frame_url: vidStartUrl,
+          prompt,
+          duration: parseInt(document.getElementById('vidDurationSlider').value, 10),
+          model: selectedVidModel,
+          ratio: selectedVidRatio === 'Auto' ? null : selectedVidRatio,
+          resolution: selectedVidRes,
+          n: quantity,
+          seed: seed >= 0 ? seed : -1,
+          with_audio: document.getElementById('vidSound').checked,
+          draft_mode: document.getElementById('vidDraft').checked,
+          fixed_lens: document.getElementById('vidFixedLens').checked,
+        };
+        if (vidEndUrl) body.end_frame_url = vidEndUrl;
+
+        const res = await fetch('/api/generate-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+
+        showVidStatus(`Job submitted — polling for result…`, 'info');
+        document.getElementById('vidPoll').style.display = 'block';
+        document.getElementById('vidPollMsg').textContent = 'Generating your video… (this takes 1–3 minutes)';
+
+        pollVideoStatus(data.task_id, 0);
+      } catch(e) {
+        showVidStatus('✗ ' + e.message, 'error');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    async function pollVideoStatus(taskId, attempts) {
+      if (attempts > 120) { // ~6 minutes max
+        showVidStatus('✗ Timed out waiting for video', 'error');
+        document.getElementById('vidPoll').style.display = 'none';
+        document.getElementById('vidBtn').classList.remove('loading');
+        document.getElementById('vidBtn').disabled = false;
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/video-status/${taskId}`);
+        const data = await res.json();
+        const elapsed = Math.round(attempts * 3);
+        document.getElementById('vidPollMsg').textContent =
+          `Generating your video… ${elapsed}s elapsed (status: ${data.status})`;
+
+        if (data.status === 'succeeded' && data.video_url) {
+          document.getElementById('vidPoll').style.display = 'none';
+          const player = document.getElementById('vidPlayer');
+          player.src = data.video_url;
+          document.getElementById('vidDownloadLink').href = data.video_url;
+          document.getElementById('vidResult').style.display = 'block';
+          showVidStatus('✓ Video generated!', 'success');
+          document.getElementById('vidBtn').classList.remove('loading');
+          document.getElementById('vidBtn').disabled = false;
+          return;
+        }
+
+        if (data.status === 'failed') {
+          document.getElementById('vidPoll').style.display = 'none';
+          showVidStatus('✗ Video generation failed', 'error');
+          document.getElementById('vidBtn').classList.remove('loading');
+          document.getElementById('vidBtn').disabled = false;
+          return;
+        }
+
+        // Still running — poll again in 3s
+        setTimeout(() => pollVideoStatus(taskId, attempts + 1), 3000);
+      } catch(e) {
+        setTimeout(() => pollVideoStatus(taskId, attempts + 1), 5000);
+      }
+    }
+
+    function showVidStatus(msg, type) {
+      const el = document.getElementById('vidStatus');
+      el.textContent = msg;
+      el.className = `status visible ${type}`;
+    }
   </script>
 </body>
 </html>

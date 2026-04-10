@@ -127,6 +127,18 @@ def init_db():
                 conn.execute(f'ALTER TABLE image_history ADD COLUMN {col} REAL DEFAULT {default}')
             except Exception:
                 pass
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS elements (
+                id          TEXT PRIMARY KEY,
+                user        TEXT NOT NULL,
+                name        TEXT NOT NULL,
+                label       TEXT NOT NULL,
+                type        TEXT NOT NULL,
+                images      TEXT NOT NULL,
+                description TEXT,
+                created_at  TEXT NOT NULL
+            )
+        ''')
 
 
 init_db()
@@ -502,6 +514,248 @@ def delete_history(entry_id):
             img_path.unlink()
         conn.execute('DELETE FROM image_history WHERE id=?', (entry_id,))
     return jsonify({'success': True})
+
+
+# ── Elements routes ───────────────────────────────────────────────────────────
+
+import re as _re
+
+def _slugify(text):
+    """Convert display label to a safe @mention slug."""
+    text = text.lower().strip()
+    text = _re.sub(r'[^a-z0-9\s-]', '', text)
+    text = _re.sub(r'[\s-]+', '-', text)
+    return text.strip('-')
+
+@app.route('/api/elements')
+@login_required
+def list_elements():
+    user = session.get('username', 'admin')
+    with get_db() as conn:
+        rows = conn.execute(
+            'SELECT * FROM elements WHERE user=? ORDER BY created_at DESC', (user,)
+        ).fetchall()
+    items = []
+    for r in rows:
+        d = dict(r)
+        try:
+            d['images'] = json.loads(d['images'])
+        except Exception:
+            d['images'] = []
+        items.append(d)
+    return jsonify({'elements': items})
+
+@app.route('/api/elements', methods=['POST'])
+@login_required
+def create_element():
+    user = session.get('username', 'admin')
+    body = request.get_json()
+    if not body:
+        return jsonify({'error': 'No data'}), 400
+    label = body.get('label', '').strip()
+    if not label:
+        return jsonify({'error': 'Label is required'}), 400
+    etype = body.get('type', 'character')
+    if etype not in ('character', 'location'):
+        return jsonify({'error': 'Type must be character or location'}), 400
+    images = body.get('images', [])
+    if not images or len(images) > 4:
+        return jsonify({'error': '1–4 images required'}), 400
+    description = body.get('description', '').strip()
+    name = _slugify(label)
+    if not name:
+        return jsonify({'error': 'Invalid label'}), 400
+    entry_id = uuid.uuid4().hex
+    created_at = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    with get_db() as conn:
+        existing = conn.execute(
+            'SELECT id FROM elements WHERE user=? AND name=?', (user, name)
+        ).fetchone()
+        if existing:
+            return jsonify({'error': f'An element named @{name} already exists'}), 409
+        conn.execute(
+            '''INSERT INTO elements (id,user,name,label,type,images,description,created_at)
+               VALUES (?,?,?,?,?,?,?,?)''',
+            (entry_id, user, name, label, etype, json.dumps(images), description, created_at)
+        )
+    return jsonify({'id': entry_id, 'name': name, 'label': label, 'type': etype,
+                    'images': images, 'description': description, 'created_at': created_at})
+
+@app.route('/api/elements/<element_id>', methods=['DELETE'])
+@login_required
+def delete_element(element_id):
+    user = session.get('username', 'admin')
+    with get_db() as conn:
+        row = conn.execute(
+            'SELECT id FROM elements WHERE id=? AND user=?', (element_id, user)
+        ).fetchone()
+        if not row:
+            return jsonify({'error': 'Not found'}), 404
+        conn.execute('DELETE FROM elements WHERE id=?', (element_id,))
+    return jsonify({'success': True})
+
+@app.route('/api/elements/upload-image', methods=['POST'])
+@login_required
+def element_upload_image():
+    """Upload an element image to Drive, return URL."""
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image'}), 400
+    f = request.files['image']
+    ext = Path(f.filename).suffix.lower() if f.filename else '.jpg'
+    mime = 'image/png' if ext == '.png' else 'image/webp' if ext == '.webp' else 'image/jpeg'
+    filename = f'elem_{uuid.uuid4().hex}{ext}'
+    file_bytes = f.read()
+    _, url = drive_upload(file_bytes, filename, mime)
+    if not url:
+        # Fallback: save locally and return local URL
+        (UPLOADS_DIR / filename).write_bytes(file_bytes)
+        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+        if railway_domain:
+            url = f'https://{railway_domain}/uploads/{filename}'
+        else:
+            url = f'http://localhost:{os.environ.get("PORT", 3000)}/uploads/{filename}'
+    return jsonify({'url': url})
+
+
+# ── Video generation routes ───────────────────────────────────────────────────
+
+@app.route('/api/generate-video', methods=['POST'])
+@login_required
+def generate_video():
+    api_key = (os.environ.get('SEEDANCE_API_KEY', '') or
+               os.environ.get('SEEDREAM_API_KEY', '')).strip()
+    if not api_key:
+        return jsonify({'error': 'Seedance API key not configured'}), 500
+
+    body = request.get_json()
+    if not body:
+        return jsonify({'error': 'No data'}), 400
+
+    start_frame_url = body.get('start_frame_url', '').strip()
+    if not start_frame_url:
+        return jsonify({'error': 'Start frame image is required'}), 400
+
+    prompt = body.get('prompt', '').strip()
+    model_id = os.environ.get('SEEDANCE_MODEL_ID', '').strip()
+    if not model_id:
+        return jsonify({'error': 'SEEDANCE_MODEL_ID env var not set — add your Seedance endpoint ID (e.g. ep-XXXX) in Railway Variables'}), 500
+    duration = int(body.get('duration', 5))
+    duration = max(4, min(12, duration))
+
+    # Build inline flags — Seedance takes params embedded in the text prompt
+    flags = []
+    flags.append(f'--duration {duration}')
+    ratio = body.get('ratio', '')
+    if ratio and ratio != 'Auto':
+        flags.append(f'--ratio {ratio}')
+    resolution = body.get('resolution', '')
+    if resolution:
+        flags.append(f'--resolution {resolution}')
+    seed = body.get('seed', -1)
+    if seed is not None and int(seed) >= 0:
+        flags.append(f'--seed {int(seed)}')
+    if not body.get('with_audio', True):
+        flags.append('--audio false')
+    if body.get('draft_mode'):
+        flags.append('--draft true')
+    camera_fixed = body.get('fixed_lens', False)
+    flags.append(f'--camerafixed {str(camera_fixed).lower()}')
+
+    text_with_flags = (prompt or 'animate this scene naturally') + '  ' + '  '.join(flags)
+
+    content = [
+        {'type': 'text', 'text': text_with_flags},
+        {'type': 'image_url', 'image_url': {'url': start_frame_url}},
+    ]
+    end_frame_url = body.get('end_frame_url', '').strip()
+    if end_frame_url:
+        content.append({'type': 'image_url', 'image_url': {'url': end_frame_url}})
+
+    payload = {
+        'model': model_id,
+        'content': content,
+    }
+
+    n = int(body.get('n', 1))
+    if n > 1:
+        payload['n'] = n
+
+    print(f'[video] model={model_id} text="{text_with_flags}"', flush=True)
+
+    try:
+        resp = requests.post(
+            'https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks',
+            headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+            json=payload,
+            timeout=90
+        )
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': f'Network error: {str(e)}'}), 502
+
+    try:
+        data = resp.json()
+    except Exception:
+        return jsonify({'error': f'Invalid response (status {resp.status_code})'}), 502
+
+    print(f'[video] task response: {data}', flush=True)
+
+    if not resp.ok:
+        msg = (data.get('error', {}) or {}).get('message') or f'API error {resp.status_code}: {data}'
+        return jsonify({'error': msg}), resp.status_code
+
+    task_id = data.get('id') or data.get('task_id')
+    if not task_id:
+        return jsonify({'error': 'No task_id returned', 'raw': data}), 502
+
+    return jsonify({'task_id': task_id, 'status': data.get('status', 'pending')})
+
+
+@app.route('/api/video-status/<task_id>')
+@login_required
+def video_status(task_id):
+    api_key = (os.environ.get('SEEDANCE_API_KEY', '') or
+               os.environ.get('SEEDREAM_API_KEY', '')).strip()
+    if not api_key:
+        return jsonify({'error': 'API key not configured'}), 500
+
+    try:
+        resp = requests.get(
+            f'https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks/{task_id}',
+            headers={'Authorization': f'Bearer {api_key}'},
+            timeout=15
+        )
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 502
+
+    try:
+        data = resp.json()
+    except Exception:
+        return jsonify({'error': 'Invalid response'}), 502
+
+    print(f'[video-status] {task_id} → {data}', flush=True)
+
+    status = data.get('status', 'unknown')
+    video_url = None
+
+    if status == 'succeeded':
+        # Extract video URL from response content
+        content = data.get('content', [])
+        if isinstance(content, list):
+            for item in content:
+                if item.get('type') == 'video_url':
+                    video_url = item.get('video_url', {}).get('url')
+                    break
+        if not video_url:
+            # Fallback: check choices structure
+            choices = data.get('choices', [])
+            if choices:
+                msg = choices[0].get('message', {})
+                for item in (msg.get('content') or []):
+                    if item.get('type') == 'video_url':
+                        video_url = item.get('video_url', {}).get('url')
+                        break
+
+    return jsonify({'status': status, 'video_url': video_url, 'raw': data})
 
 
 if __name__ == '__main__':
