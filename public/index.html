@@ -3847,7 +3847,7 @@
     }
 
     async function pollVideoStatus(taskId, attempts) {
-      if (attempts > 120) { // ~6 minutes max
+      if (attempts > 300) { // ~15 minutes max
         showVidStatus('✗ Timed out waiting for video', 'error');
         document.getElementById('vidPoll').style.display = 'none';
         document.getElementById('vidBtn').classList.remove('loading');
