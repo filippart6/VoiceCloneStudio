@@ -1250,6 +1250,7 @@
       transition: border-color 0.2s, color 0.2s;
     }
     .elem-img-add:hover { border-color: var(--accent); color: var(--accent); }
+    .elem-img-strip.dragover { outline: 2px dashed var(--accent); outline-offset: 4px; border-radius: 10px; background: rgba(124,92,252,0.06); }
     .elem-img-status {
       font-size: 0.78rem;
       color: var(--text-muted);
@@ -2350,9 +2351,9 @@
           </div>
         </div>
 
-        <!-- Toggles -->
+        <!-- Toggles — labels use for= so native checkbox handles the toggle, no onclick needed -->
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
-          <label class="toggle-field" onclick="toggleVidOption('vidSound')">
+          <label class="toggle-field" for="vidSound">
             <div class="toggle-info">
               <div class="toggle-label-text">Output sound</div>
               <div class="toggle-desc">Generate ambient audio alongside the video</div>
@@ -2362,7 +2363,7 @@
               <span class="toggle-track"></span>
             </div>
           </label>
-          <label class="toggle-field" onclick="toggleVidOption('vidDraft')">
+          <label class="toggle-field" for="vidDraft">
             <div class="toggle-info">
               <div class="toggle-label-text">Draft mode</div>
               <div class="toggle-desc">Faster generation, lower quality — good for testing</div>
@@ -2372,7 +2373,7 @@
               <span class="toggle-track"></span>
             </div>
           </label>
-          <label class="toggle-field" onclick="toggleVidOption('vidFixedLens')">
+          <label class="toggle-field" for="vidFixedLens">
             <div class="toggle-info">
               <div class="toggle-label-text">Fixed lens</div>
               <div class="toggle-desc">Lock camera position — no camera movement</div>
@@ -2732,7 +2733,8 @@
       let html = '';
 
       // @image option (only for image prompt)
-      if (textarea === imgPrompt && refImageBase64 && (!q || 'image'.startsWith(q))) {
+      const hasRefImg = refImageBase64 || document.getElementById('refPreview')?.dataset.driveUrl;
+      if (textarea === imgPrompt && hasRefImg && (!q || 'image'.startsWith(q))) {
         const thumb = document.getElementById('refThumb')?.src || '';
         const fname = document.getElementById('refFileName')?.textContent || 'reference image';
         html += `
@@ -2802,7 +2804,8 @@
 
     function syncAtTagBar() {
       const tags = [];
-      if (/@image\b/.test(imgPrompt.value) && refImageBase64) {
+      const hasRefImgForTag = refImageBase64 || document.getElementById('refPreview')?.dataset.driveUrl;
+      if (/@image\b/.test(imgPrompt.value) && hasRefImgForTag) {
         const thumb = document.getElementById('refThumb')?.src || '';
         tags.push(`<div class="at-tag"><img src="${thumb}" alt="ref" />@image — reference photo will guide this generation</div>`);
       }
@@ -3670,6 +3673,19 @@
     // Load elements on page load so @mentions work immediately
     loadElements();
 
+    // ── Elements image strip drag-and-drop ────────────────────
+    const elemImgStripEl = document.getElementById('elemImgStrip');
+    elemImgStripEl.addEventListener('dragover', e => { e.preventDefault(); elemImgStripEl.classList.add('dragover'); });
+    elemImgStripEl.addEventListener('dragleave', e => {
+      if (!elemImgStripEl.contains(e.relatedTarget)) elemImgStripEl.classList.remove('dragover');
+    });
+    elemImgStripEl.addEventListener('drop', async e => {
+      e.preventDefault();
+      elemImgStripEl.classList.remove('dragover');
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      if (files.length > 0) await onElemImgPick({ files, value: '' });
+    });
+
     // ── Video generation ──────────────────────────────────
     const VID_MODELS = [
       {
@@ -3733,14 +3749,12 @@
 
     function selectVidRatio(r) {
       selectedVidRatio = r;
-      document.querySelectorAll('.vid-ratio-opt').forEach(el => el.classList.remove('selected'));
-      event.target.classList.add('selected');
+      renderVidRatioRes();
     }
 
     function selectVidRes(r) {
       selectedVidRes = r;
-      document.querySelectorAll('.vid-res-opt').forEach(el => el.classList.remove('selected'));
-      event.target.classList.add('selected');
+      renderVidRatioRes();
     }
 
     function toggleVidOption(id) {
