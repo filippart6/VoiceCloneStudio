@@ -344,24 +344,169 @@ def text_to_speech(voice_id):
                     headers={'Content-Disposition': 'inline; filename="speech.mp3"'})
 
 
+def _aspect_ratio_from_size(w, h):
+    """Pick the closest standard aspect-ratio string for the given pixel size."""
+    if not w or not h:
+        return '1:1'
+    candidates = {'1:1': 1.0, '16:9': 16/9, '9:16': 9/16, '4:3': 4/3,
+                  '3:4': 3/4, '21:9': 21/9, '3:2': 3/2, '2:3': 2/3}
+    target = w / h
+    return min(candidates.items(), key=lambda kv: abs(kv[1] - target))[0]
+
+
+def _luma_generate(prompt, aspect_ratio, ref_url=None):
+    """Submit a Luma generation, poll until done, return image bytes + final state.
+
+    Returns (img_bytes, model_used, error) — img_bytes is None on error."""
+    api_key = os.environ.get('LUMA_AGENTS_API_KEY', '').strip()
+    if not api_key:
+        return None, None, 'LUMA_AGENTS_API_KEY env var not set'
+
+    # The model string the user wants — Luma docs mention "uni-1", "uni-1-max";
+    # user specified "uni-1.1". Allow override via env var.
+    model_name = os.environ.get('LUMA_MODEL_ID', 'uni-1.1').strip() or 'uni-1.1'
+
+    payload = {'model': model_name, 'prompt': prompt}
+    if aspect_ratio:
+        payload['aspect_ratio'] = aspect_ratio
+    if ref_url and ref_url.startswith('http'):
+        payload['image_ref'] = [{'url': ref_url}]
+
+    print(f'[luma] submitting payload keys={list(payload.keys())} model={model_name}', flush=True)
+    try:
+        resp = requests.post(
+            'https://agents.lumalabs.ai/v1/generations',
+            headers={'Authorization': f'Bearer {api_key}',
+                     'Content-Type': 'application/json'},
+            json=payload, timeout=30
+        )
+    except requests.exceptions.RequestException as e:
+        return None, model_name, f'Luma network error: {e}'
+
+    try:
+        data = resp.json()
+    except Exception:
+        return None, model_name, f'Luma invalid response (status {resp.status_code})'
+
+    if not resp.ok:
+        msg = (data.get('error') if isinstance(data.get('error'), str)
+               else (data.get('error') or {}).get('message')) or f'Luma API error {resp.status_code}: {data}'
+        return None, model_name, msg
+
+    gen_id = data.get('id') or data.get('generation_id')
+    if not gen_id:
+        return None, model_name, f'Luma did not return generation id: {data}'
+
+    # Poll up to ~90s
+    import time
+    deadline = time.time() + 90
+    final = None
+    while time.time() < deadline:
+        time.sleep(2)
+        try:
+            poll = requests.get(
+                f'https://agents.lumalabs.ai/v1/generations/{gen_id}',
+                headers={'Authorization': f'Bearer {api_key}'}, timeout=15
+            )
+            pdata = poll.json()
+        except Exception as e:
+            print(f'[luma] poll error: {e}', flush=True)
+            continue
+        state = pdata.get('state') or pdata.get('status')
+        print(f'[luma] {gen_id} → state={state}', flush=True)
+        if state in ('completed', 'succeeded'):
+            final = pdata
+            break
+        if state == 'failed':
+            return None, model_name, f'Luma generation failed: {pdata.get("failure_reason") or pdata}'
+
+    if not final:
+        return None, model_name, 'Luma generation timed out after 90s'
+
+    # Extract URL — try a few shapes
+    url = None
+    out = final.get('output')
+    if isinstance(out, list) and out:
+        first = out[0]
+        if isinstance(first, dict):
+            url = first.get('url') or first.get('image_url')
+        elif isinstance(first, str):
+            url = first
+    elif isinstance(out, dict):
+        url = out.get('url') or out.get('image_url')
+    if not url:
+        # Try assets.image
+        assets = final.get('assets') or {}
+        url = assets.get('image') or assets.get('url')
+    if not url:
+        return None, model_name, f'Luma succeeded but no URL found: {final}'
+
+    try:
+        img_resp = requests.get(url, timeout=60)
+        img_resp.raise_for_status()
+        return img_resp.content, model_name, None
+    except Exception as e:
+        return None, model_name, f'Failed to download Luma image: {e}'
+
+
 @app.route('/api/generate-image', methods=['POST'])
 @login_required
 def generate_image():
-    api_key = os.environ.get('SEEDREAM_API_KEY', '').strip()
-    if not api_key:
-        return jsonify({'error': 'Seedream API key not configured'}), 500
-
     body = request.get_json()
     if not body or not body.get('prompt', '').strip():
         return jsonify({'error': 'Prompt is required'}), 400
 
-    size_str = f"{body.get('width', 1920)}x{body.get('height', 1920)}"
+    requested_model = (body.get('model') or '').strip().lower()
+    prompt_text = body['prompt'].strip()
+    width  = int(body.get('width',  1920))
+    height = int(body.get('height', 1920))
+
+    # ── Dispatch: Luma Uni ───────────────────────────────────────────────
+    if requested_model.startswith('uni'):
+        aspect = _aspect_ratio_from_size(width, height)
+        # Prefer Drive URL ref; ignore base64 (Luma needs HTTPS URL)
+        ref_url = body.get('reference_image_url', '') or None
+        img_bytes, model_used, err = _luma_generate(prompt_text, aspect, ref_url)
+        if err:
+            print(f'[luma] error: {err}', flush=True)
+            return jsonify({'error': err}), 502
+
+        filename = f"{uuid.uuid4().hex}.jpg"
+        _, drive_url = drive_upload(img_bytes, filename)
+        if drive_url:
+            image_url = drive_url
+        else:
+            (UPLOADS_DIR / filename).write_bytes(img_bytes)
+            image_url = f'/uploads/{filename}'
+
+        entry_id = uuid.uuid4().hex
+        user = session.get('username', 'admin')
+        size_str = f'{width}x{height}'
+        with get_db() as conn:
+            conn.execute(
+                '''INSERT INTO image_history
+                   (id,user,prompt,neg_prompt,size,model,filename,created_at,guidance_scale,steps)
+                   VALUES (?,?,?,?,?,?,?,?,?,?)''',
+                (entry_id, user, prompt_text,
+                 body.get('negative_prompt', '') or '',
+                 size_str, model_used, image_url,
+                 datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                 0.0, 0)
+            )
+        return jsonify({'url': image_url, 'id': entry_id})
+
+    # ── Default: Seedream ────────────────────────────────────────────────
+    api_key = os.environ.get('SEEDREAM_API_KEY', '').strip()
+    if not api_key:
+        return jsonify({'error': 'Seedream API key not configured'}), 500
+
+    size_str = f"{width}x{height}"
     guidance = float(body.get('guidance_scale', 7.5))
     steps    = int(body.get('steps', 30))
 
     payload = {
         'model': os.environ.get('SEEDREAM_MODEL_ID', 'ep-20251203184030-sffv6'),
-        'prompt': body['prompt'].strip(),
+        'prompt': prompt_text,
         'size': size_str,
         'n': 1,
         'watermark': False,
@@ -440,7 +585,7 @@ def generate_image():
                (id,user,prompt,neg_prompt,size,model,filename,created_at,guidance_scale,steps)
                VALUES (?,?,?,?,?,?,?,?,?,?)''',
             (entry_id, user,
-             body['prompt'].strip(),
+             prompt_text,
              body.get('negative_prompt', '') or '',
              size_str, payload['model'],
              image_url,
@@ -668,14 +813,34 @@ def element_upload_image():
 
 # ── Video generation routes ───────────────────────────────────────────────────
 
+def _resolve_video_model(requested_model):
+    """Pick the right model id + API key based on the model the user selected.
+    Returns (model_id, api_key, error)."""
+    if requested_model == 'seedance-2-0':
+        model_id = os.environ.get('SEEDANCE2_MODEL_ID', '').strip()
+        api_key  = (os.environ.get('SEEDANCE2_API_KEY', '') or
+                    os.environ.get('SEEDANCE_API_KEY', '') or
+                    os.environ.get('SEEDREAM_API_KEY', '')).strip()
+        if not model_id:
+            return None, None, 'SEEDANCE2_MODEL_ID env var not set — add the Seedance 2.0 endpoint ID in Railway Variables'
+        if not api_key:
+            return None, None, 'No API key configured for Seedance 2.0'
+        return model_id, api_key, None
+
+    # Default: Seedance 1.5
+    model_id = os.environ.get('SEEDANCE_MODEL_ID', '').strip()
+    api_key  = (os.environ.get('SEEDANCE_API_KEY', '') or
+                os.environ.get('SEEDREAM_API_KEY', '')).strip()
+    if not model_id:
+        return None, None, 'SEEDANCE_MODEL_ID env var not set — add your Seedance endpoint ID (e.g. ep-XXXX) in Railway Variables'
+    if not api_key:
+        return None, None, 'Seedance API key not configured'
+    return model_id, api_key, None
+
+
 @app.route('/api/generate-video', methods=['POST'])
 @login_required
 def generate_video():
-    api_key = (os.environ.get('SEEDANCE_API_KEY', '') or
-               os.environ.get('SEEDREAM_API_KEY', '')).strip()
-    if not api_key:
-        return jsonify({'error': 'Seedance API key not configured'}), 500
-
     body = request.get_json()
     if not body:
         return jsonify({'error': 'No data'}), 400
@@ -684,10 +849,12 @@ def generate_video():
     if not start_frame_url:
         return jsonify({'error': 'Start frame image is required'}), 400
 
+    requested_model = (body.get('model') or 'seedance-1-5-pro').strip().lower()
+    model_id, api_key, err = _resolve_video_model(requested_model)
+    if err:
+        return jsonify({'error': err}), 500
+
     prompt = body.get('prompt', '').strip()
-    model_id = os.environ.get('SEEDANCE_MODEL_ID', '').strip()
-    if not model_id:
-        return jsonify({'error': 'SEEDANCE_MODEL_ID env var not set — add your Seedance endpoint ID (e.g. ep-XXXX) in Railway Variables'}), 500
     duration = int(body.get('duration', 5))
     duration = max(4, min(12, duration))
 
@@ -762,19 +929,33 @@ def generate_video():
 @app.route('/api/video-status/<task_id>')
 @login_required
 def video_status(task_id):
-    api_key = (os.environ.get('SEEDANCE_API_KEY', '') or
-               os.environ.get('SEEDREAM_API_KEY', '')).strip()
-    if not api_key:
+    # Try keys in priority order — Seedance 2, Seedance 1, Seedream — to support
+    # tasks created by either video model.
+    keys = [k for k in [
+        os.environ.get('SEEDANCE2_API_KEY', '').strip(),
+        os.environ.get('SEEDANCE_API_KEY', '').strip(),
+        os.environ.get('SEEDREAM_API_KEY', '').strip(),
+    ] if k]
+    seen = set()
+    keys = [k for k in keys if not (k in seen or seen.add(k))]
+    if not keys:
         return jsonify({'error': 'API key not configured'}), 500
 
-    try:
-        resp = requests.get(
-            f'https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks/{task_id}',
-            headers={'Authorization': f'Bearer {api_key}'},
-            timeout=15
-        )
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': str(e)}), 502
+    resp = None
+    last_err = None
+    for api_key in keys:
+        try:
+            resp = requests.get(
+                f'https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks/{task_id}',
+                headers={'Authorization': f'Bearer {api_key}'},
+                timeout=15
+            )
+            if resp.status_code != 401:
+                break  # this key worked (or got a non-auth error)
+        except requests.exceptions.RequestException as e:
+            last_err = str(e)
+    if resp is None:
+        return jsonify({'error': last_err or 'Network error'}), 502
 
     try:
         data = resp.json()

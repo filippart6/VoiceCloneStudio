@@ -1585,7 +1585,13 @@
     <div class="page">
       <div class="page-header">
         <h2>Image Generation</h2>
-        <p>Generate images with Seedream 4.5 — describe what you want to see</p>
+        <p>Generate images with Seedream 4.5 or Uni-1.1 — describe what you want to see</p>
+      </div>
+
+      <!-- Model picker -->
+      <div class="card">
+        <div class="card-title">Model</div>
+        <div class="vid-model-grid" id="imgModelGrid"></div>
       </div>
 
       <!-- Style Presets -->
@@ -2247,7 +2253,7 @@
     <div class="page">
       <div class="page-header">
         <h2>Video Generation</h2>
-        <p>Animate a still image into video with Seedance 1.5 — upload a start frame and describe the motion</p>
+        <p>Animate a still image into video with Seedance 1.5 or 2.0 — upload a start frame and describe the motion</p>
       </div>
 
       <div class="card">
@@ -2853,6 +2859,33 @@
       return null;
     }
 
+    // ── Image model picker ────────────────────────────────
+    const IMG_MODELS = [
+      { id: 'seedream-4-5', name: 'Seedream 4.5', desc: 'ByteDance · realism', available: true },
+      { id: 'uni-1.1',       name: 'Uni-1.1',      desc: 'Luma · creative styles', available: true },
+    ];
+    let selectedImgModel = IMG_MODELS[0].id;
+    function renderImgModels() {
+      const grid = document.getElementById('imgModelGrid');
+      if (!grid) return;
+      grid.innerHTML = IMG_MODELS.map(m => `
+        <div class="vid-model-opt${m.id === selectedImgModel ? ' selected' : ''}${m.available ? '' : ' disabled'}"
+             id="imod-${m.id}"
+             onclick="${m.available ? `selectImgModel('${m.id}')` : 'void(0)'}">
+          <div class="vid-model-name">
+            <span class="vid-model-dot ${m.available ? 'ready' : 'soon'}"></span>
+            ${m.name}
+          </div>
+          <span class="vid-model-tag ${m.available ? 'tag-ready' : 'tag-soon'}">${m.available ? 'Ready' : 'Soon'}</span>
+          <div class="vid-model-desc">${m.desc}</div>
+        </div>`).join('');
+    }
+    function selectImgModel(id) {
+      selectedImgModel = id;
+      renderImgModels();
+    }
+    renderImgModels();
+
     // ── Batch generation ──────────────────────────────────
     let batchCount = 1;
 
@@ -2925,7 +2958,7 @@
         const res = await fetch('/api/generate-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, negative_prompt: negPrompt, width, height, ...refPayload })
+          body: JSON.stringify({ prompt, negative_prompt: negPrompt, width, height, model: selectedImgModel, ...refPayload })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
@@ -3697,8 +3730,8 @@
       {
         id: 'seedance-2-0',
         name: 'Seedance 2.0',
-        desc: 'Next-gen · coming soon',
-        available: false,
+        desc: 'Next-gen · higher fidelity',
+        available: true,
       },
       {
         id: 'kling-3-0',
