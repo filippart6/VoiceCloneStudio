@@ -362,9 +362,8 @@ def _luma_generate(prompt, aspect_ratio, ref_url=None):
     if not api_key:
         return None, None, 'LUMA_AGENTS_API_KEY env var not set'
 
-    # The model string the user wants — Luma docs mention "uni-1", "uni-1-max";
-    # user specified "uni-1.1". Allow override via env var.
-    model_name = os.environ.get('LUMA_MODEL_ID', 'uni-1.1').strip() or 'uni-1.1'
+    # Luma supports "uni-1" (base) and "uni-1-max" (higher quality). Allow override via env var.
+    model_name = os.environ.get('LUMA_MODEL_ID', 'uni-1-max').strip() or 'uni-1-max'
 
     payload = {'model': model_name, 'prompt': prompt}
     if aspect_ratio:
