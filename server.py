@@ -815,24 +815,16 @@ def element_upload_image():
 
 def _resolve_video_model(requested_model):
     """Pick the right model id + API key based on the model the user selected.
+    Seedance 2.0 is the only active model right now.
     Returns (model_id, api_key, error)."""
-    if requested_model == 'seedance-2-0':
-        model_id = os.environ.get('SEEDANCE2_MODEL_ID', '').strip()
-        api_key  = (os.environ.get('SEEDANCE2_API_KEY', '') or
-                    os.environ.get('SEEDANCE_API_KEY', '') or
-                    os.environ.get('SEEDREAM_API_KEY', '')).strip()
-        if not model_id:
-            return None, None, 'SEEDANCE2_MODEL_ID env var not set — add the Seedance 2.0 endpoint ID in Railway Variables'
-        if not api_key:
-            return None, None, 'No API key configured for Seedance 2.0'
-        return model_id, api_key, None
-
-    # Default: Seedance 1.5
-    model_id = os.environ.get('SEEDANCE_MODEL_ID', '').strip()
-    api_key  = (os.environ.get('SEEDANCE_API_KEY', '') or
+    # All active video models go through the ARK platform with the Seedance key.
+    model_id = (os.environ.get('SEEDANCE2_MODEL_ID', '').strip() or
+                os.environ.get('SEEDANCE_MODEL_ID', '').strip())
+    api_key  = (os.environ.get('SEEDANCE2_API_KEY', '') or
+                os.environ.get('SEEDANCE_API_KEY', '') or
                 os.environ.get('SEEDREAM_API_KEY', '')).strip()
     if not model_id:
-        return None, None, 'SEEDANCE_MODEL_ID env var not set — add your Seedance endpoint ID (e.g. ep-XXXX) in Railway Variables'
+        return None, None, 'SEEDANCE2_MODEL_ID env var not set — add the Seedance 2.0 endpoint ID in Railway Variables'
     if not api_key:
         return None, None, 'Seedance API key not configured'
     return model_id, api_key, None
